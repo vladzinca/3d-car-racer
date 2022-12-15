@@ -1,0 +1,465 @@
+#include "lab_m1/Tema2/tema2.h"
+
+#include <vector>
+#include <string>
+#include <iostream>
+
+#include "lab_m1/Tema2/obj3D.h"
+#include "lab_m1/Tema2/transf3D.h"
+#include "lab_m1/Tema2/hw_camera.h"
+
+using namespace std;
+using namespace m1;
+
+
+/*
+ *  To find out more about `FrameStart`, `Update`, `FrameEnd`
+ *  and the order in which they are called, see `world.cpp`.
+ */
+
+
+Tema2::Tema2()
+{
+}
+
+
+Tema2::~Tema2()
+{
+}
+
+
+void Tema2::Init()
+{
+    //{
+    //    Mesh* mesh = new Mesh("box");
+    //    mesh->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "primitives"), "box.obj");
+    //    meshes[mesh->GetMeshID()] = mesh;
+    //}
+
+    //// Create a simple cube
+    //{
+    //    vector<VertexFormat> vertices
+    //    {
+    //        VertexFormat(glm::vec3(-1, -1,  1), glm::vec3(1), glm::vec3(1, 0, 1)),
+    //        VertexFormat(glm::vec3( 1, -1,  1), glm::vec3(1), glm::vec3(1, 0, 1)),
+    //        VertexFormat(glm::vec3(-1,  1,  1), glm::vec3(1), glm::vec3(1, 0, 1)),
+    //        VertexFormat(glm::vec3( 1,  1,  1), glm::vec3(1), glm::vec3(1, 0, 1)),
+    //        VertexFormat(glm::vec3(-1, -1, -1), glm::vec3(1), glm::vec3(1, 0, 1)),
+    //        VertexFormat(glm::vec3( 1, -1, -1), glm::vec3(1), glm::vec3(1, 0, 1)),
+    //        VertexFormat(glm::vec3(-1,  1, -1), glm::vec3(1), glm::vec3(1, 0, 1)),
+    //        VertexFormat(glm::vec3( 1,  1, -1), glm::vec3(1), glm::vec3(1, 0, 1)),
+    //    };
+
+    //    vector<unsigned int> indices =
+    //    {
+    //        0, 1, 2,        1, 3, 2,
+    //        2, 3, 7,        2, 7, 6,
+    //        1, 7, 3,        1, 5, 7,
+    //        6, 7, 4,        7, 5, 4,
+    //        0, 4, 1,        1, 4, 5,
+    //        2, 6, 4,        0, 2, 4,
+    //    };
+
+    //    CreateMesh("cube", vertices, indices);
+    //}
+
+    camera = new implement::Camera();
+    camera->Set(glm::vec3(0, 2, 2), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
+
+    translateX = 0;
+    translateZ = 0;
+
+    position = glm::vec3(-0.25f, 0.15f, -0.5f);
+
+    angularStepOY = 0;
+
+    forward = glm::vec3(0, 0, -1);
+
+    fov = 60.0f;
+    zNear = 0.01f;
+    zFar = 200.0f;
+
+    projectionMatrix = glm::perspective(RADIANS(fov), window->props.aspectRatio, zNear, zFar);
+
+    // Create a shader program for drawing face polygon with the color of the normal
+    {
+        Shader *shader = new Shader("LabShader");
+        shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "Tema2", "shaders", "VertexShader.glsl"), GL_VERTEX_SHADER);
+        shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "Tema2", "shaders", "FragmentShader.glsl"), GL_FRAGMENT_SHADER);
+        shader->CreateAndLink();
+        shaders[shader->GetName()] = shader;
+    }
+
+    //{
+    //    Mesh* mesh = new Mesh("plane");
+    //    mesh->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "primitives"), "plane50.obj");
+    //    meshes[mesh->GetMeshID()] = mesh;
+    //}
+
+    //color = glm::vec3(0, 0, 1);
+    //Mesh* myCube = obj3D::CreateCube("myCube", glm::vec3(0, 0, 0), 1, glm::vec3(1, 1, 0));
+    //AddMeshToList(myCube);
+
+    Mesh* green_plane = obj3D::CreateCuboid("green_plane", glm::vec3(-64, 0, -64), 128, 0.1f, 128, glm::vec3(0.5f, 0.8f, 0.3f));
+    AddMeshToList(green_plane);
+
+    Mesh* horizon_top = obj3D::CreateCuboid("horizon_top", glm::vec3(-64, 64, -64), 128, 0.1f, 128, glm::vec3(0.5f, 0.8f, 0.9f));
+    AddMeshToList(horizon_top);
+
+    Mesh* horizon_back = obj3D::CreateCuboid("horizon_back", glm::vec3(-64, 0, 64), 128, 64, 0.1f, glm::vec3(0.5f, 0.8f, 0.9f));
+    AddMeshToList(horizon_back);
+
+    Mesh* horizon_right = obj3D::CreateCuboid("horizon_right", glm::vec3(64, 0, -64), 0.1f, 64, 128, glm::vec3(0.5f, 0.8f, 0.9f));
+    AddMeshToList(horizon_right);
+
+    Mesh* horizon_front = obj3D::CreateCuboid("horizon_front", glm::vec3(-64, 0, -64), 128, 64, 0.1f, glm::vec3(0.5f, 0.8f, 0.9f));
+    AddMeshToList(horizon_front);
+
+    Mesh* horizon_left = obj3D::CreateCuboid("horizon_left", glm::vec3(-64, 0, -64), 0.1f, 64, 128, glm::vec3(0.5f, 0.8f, 0.9f));
+    AddMeshToList(horizon_left);
+
+    int roadPointCount = 40;
+
+    vector<glm::vec3> roadPoints;
+    roadPoints.push_back(glm::vec3(33.65f, 0.13f, 5.15f)); // A
+    roadPoints.push_back(glm::vec3(30.53f, 0.13f, 8.93f));
+    roadPoints.push_back(glm::vec3(26.83f, 0.13f, 13.31f));
+    roadPoints.push_back(glm::vec3(21.04f, 0.13f, 17.59f));
+
+    roadPoints.push_back(glm::vec3(15.59f, 0.13f, 18.85f)); // E
+    roadPoints.push_back(glm::vec3(10.89f, 0.13f, 18.43f));
+    roadPoints.push_back(glm::vec3(5.85f, 0.13f, 15.91f));
+    roadPoints.push_back(glm::vec3(3.0f, 0.13f, 11.8f));
+
+    roadPoints.push_back(glm::vec3(1.74f, 0.13f, 7.44f)); // I
+    roadPoints.push_back(glm::vec3(0.4f, 0.13f, 2.15f));
+    roadPoints.push_back(glm::vec3(-0.61f, 0.13f, -3.38f));
+    roadPoints.push_back(glm::vec3(-1.78f, 0.13f, -8.42f));
+
+    roadPoints.push_back(glm::vec3(-3.96f, 0.13f, -13.7f)); // M
+    roadPoints.push_back(glm::vec3(-7.15f, 0.13f, -16.81f));
+    roadPoints.push_back(glm::vec3(-12.02f, 0.13f, -17.9f));
+    roadPoints.push_back(glm::vec3(-18.06f, 0.13f, -18.23f));
+
+    roadPoints.push_back(glm::vec3(-23.09f, 0.13f, -19.83f)); // Q
+    roadPoints.push_back(glm::vec3(-27.37f, 0.13f, -22.93f));
+    roadPoints.push_back(glm::vec3(-29.3f, 0.13f, -27.3f));
+    roadPoints.push_back(glm::vec3(-30.29f, 0.13f, -31.97f));
+
+    roadPoints.push_back(glm::vec3(-30.2f, 0.13f, -36.97f)); // U
+    roadPoints.push_back(glm::vec3(-28.87f, 0.13f, -40.66f));
+    roadPoints.push_back(glm::vec3(-26.14f, 0.13f, -43.21f));
+    roadPoints.push_back(glm::vec3(-21.51f, 0.13f, -44.06f));
+
+    roadPoints.push_back(glm::vec3(-15.28f, 0.13f, -43.11f)); // A1
+    roadPoints.push_back(glm::vec3(-9.51f, 0.13f, -41.79f));
+    roadPoints.push_back(glm::vec3(-5.0f, 0.13f, -40.0f));
+    roadPoints.push_back(glm::vec3(-0.35f, 0.13f, -36.59f));
+
+    roadPoints.push_back(glm::vec3(3.99f, 0.13f, -32.44f)); // E1
+    roadPoints.push_back(glm::vec3(8.34f, 0.13f, -28.0f));
+    roadPoints.push_back(glm::vec3(11.73f, 0.13f, -23.28f));
+    roadPoints.push_back(glm::vec3(15.89f, 0.13f, -18.93f));
+
+    roadPoints.push_back(glm::vec3(20.71f, 0.13f, -16.2f)); // I1
+    roadPoints.push_back(glm::vec3(25.81f, 0.13f, -14.31f));
+    roadPoints.push_back(glm::vec3(30.15f, 0.13f, -12.8f));
+    roadPoints.push_back(glm::vec3(34.5f, 0.13f, -11.85f));
+
+    roadPoints.push_back(glm::vec3(37.8f, 0.13f, -10.06f)); // M1
+    roadPoints.push_back(glm::vec3(39.69f, 0.13f, -6.85f));
+    roadPoints.push_back(glm::vec3(38.74f, 0.13f, -2.69f));
+    roadPoints.push_back(glm::vec3(36.57f, 0.13f, 1.09f));
+
+    Mesh* road = obj3D::GenerateCompleteRoad("road", roadPoints, roadPointCount, glm::vec3(0.2f, 0.2f, 0.2f));
+    AddMeshToList(road);
+
+    Mesh* car = obj3D::CreateCuboid("car", position, 0.5f, 0.5f, 1.0f, glm::vec3(0, 1, 1));
+    AddMeshToList(car);
+
+    //Mesh* testCube = obj3D::CreateCube("testCube", glm::vec3(-25, 0.15f, 5), 0.5f, glm::vec3(1, 1, 0));
+    //AddMeshToList(testCube);
+}
+
+
+Mesh* Tema2::CreateMesh(const char *name, const std::vector<VertexFormat> &vertices, const std::vector<unsigned int> &indices)
+{
+    unsigned int VAO = 0;
+    // Create the VAO and bind it
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    // Create the VBO and bind it
+    unsigned int VBO;
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    // Send vertices data into the VBO buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+
+    // Create the IBO and bind it
+    unsigned int IBO;
+    glGenBuffers(1, &IBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+
+    // Send indices data into the IBO buffer
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), &indices[0], GL_STATIC_DRAW);
+
+    // ========================================================================
+    // This section demonstrates how the GPU vertex shader program
+    // receives data.
+
+    // TODO(student): If you look closely in the `Init()` and `Update()`
+    // functions, you will see that we have three objects which we load
+    // and use in three different ways:
+    // - LoadMesh   + LabShader (this lab's shader)
+    // - CreateMesh + VertexNormal (this shader is already implemented)
+    // - CreateMesh + LabShader (this lab's shader)
+    // To get an idea about how they're different from one another, do the
+    // following experiments. What happens if you switch the color pipe and
+    // normal pipe in this function (but not in the shader)? Now, what happens
+    // if you do the same thing in the shader (but not in this function)?
+    // Finally, what happens if you do the same thing in both places? Why?
+
+    // Set vertex position attribute
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), 0);
+
+    // Set vertex normal attribute
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(sizeof(glm::vec3))); // citeste dupa 3 float-uri, 3 * 8 = 24 bytes
+
+    // Set texture coordinate attribute
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3))); // citeste dupa 6 float-uri
+
+    //// Set vertex color attribute
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3) + sizeof(glm::vec2))); // citeste dupa 8 float-uri
+    // ========================================================================
+
+    // Unbind the VAO
+    glBindVertexArray(0);
+
+    // Check for OpenGL errors
+    CheckOpenGLError();
+
+    // Mesh information is saved into a Mesh object
+    meshes[name] = new Mesh(name);
+    meshes[name]->InitFromBuffer(VAO, static_cast<unsigned int>(indices.size()));
+    meshes[name]->vertices = vertices;
+    meshes[name]->indices = indices;
+    return meshes[name];
+}
+
+
+void Tema2::FrameStart()
+{
+    // Clears the color buffer (using the previously set color) and depth buffer
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glm::ivec2 resolution = window->GetResolution();
+    // Sets the screen area where to draw
+    glViewport(0, 0, resolution.x, resolution.y);
+}
+
+
+void Tema2::Update(float deltaTimeSeconds)
+{
+    //{
+    //    glm::mat4 modelMatrix = glm::mat4(1);
+    //    modelMatrix = glm::translate(modelMatrix, glm::vec3(-2, 0.5f, 0));
+    //    modelMatrix = glm::rotate(modelMatrix, RADIANS(60.0f), glm::vec3(1, 1, 0));
+    //    RenderMesh(meshes["box"], shaders["LabShader"], modelMatrix);
+    //}
+
+    //{
+    //    glm::mat4 modelMatrix = glm::mat4(1);
+    //    modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 1, 0));
+    //    modelMatrix = glm::rotate(modelMatrix, RADIANS(45.0f), glm::vec3(0, 1, 0));
+    //    modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f));
+    //    RenderSimpleMesh(meshes["cube"], shaders["VertexNormal"], modelMatrix);
+    //}
+
+    //{
+    //    glm::mat4 modelMatrix = glm::mat4(1);
+    //    modelMatrix = glm::translate(modelMatrix, glm::vec3(2, 0.5f, 0));
+    //    modelMatrix = glm::rotate(modelMatrix, RADIANS(60.0f), glm::vec3(1, 0, 0));
+    //    modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f));
+    //    RenderSimpleMesh(meshes["cube"], shaders["LabShader"], modelMatrix);
+    //}
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        RenderSimpleMesh(meshes["myCube"], shaders["LabShader"], modelMatrix);
+    }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        RenderSimpleMesh(meshes["green_plane"], shaders["LabShader"], modelMatrix);
+    }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        RenderSimpleMesh(meshes["horizon_top"], shaders["LabShader"], modelMatrix);
+    }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        RenderSimpleMesh(meshes["horizon_back"], shaders["LabShader"], modelMatrix);
+    }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        RenderSimpleMesh(meshes["horizon_right"], shaders["LabShader"], modelMatrix);
+    }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        RenderSimpleMesh(meshes["horizon_front"], shaders["LabShader"], modelMatrix);
+    }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        RenderSimpleMesh(meshes["horizon_left"], shaders["LabShader"], modelMatrix);
+    }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        RenderSimpleMesh(meshes["road"], shaders["LabShader"], modelMatrix);
+    }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix *= transf3D::Translate(translateX, 0, translateZ);
+        modelMatrix *= transf3D::RotateOY(angularStepOY);
+        RenderSimpleMesh(meshes["car"], shaders["LabShader"], modelMatrix);
+    }
+}
+
+
+void Tema2::FrameEnd()
+{
+    DrawCoordinateSystem(camera->GetViewMatrix(), projectionMatrix);
+}
+
+
+void Tema2::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & modelMatrix)
+{
+    if (!mesh || !shader || !shader->GetProgramID())
+        return;
+
+    // Render an object using the specified shader and the specified position
+    glUseProgram(shader->program);
+
+    // TODO(student): Get shader location for uniform mat4 "Model"
+    int location1 = glGetUniformLocation(shader->program, "Model");
+    //int location = glGetUniformLocation(shader->program, "Nume1");
+    //glUniform1f(location, 3.12312f);
+    //glUniform1i(location, 3); // daca vreau sa trimit un int
+    //glUniform3f(location, /* 3 float-uri */);
+
+    // TODO(student): Set shader uniform "Model" to modelMatrix
+
+    // TODO(student): Get shader location for uniform mat4 "View"
+    int location2 = glGetUniformLocation(shader->program, "View");
+
+    // TODO(student): Set shader uniform "View" to viewMatrix
+    //glm::mat4 viewMatrix = camera->GetViewMatrix();
+    //glm::mat4 viewMatrix = GetSceneCamera()->GetViewMatrix();
+
+    // TODO(student): Get shader location for uniform mat4 "Projection"
+    int location3 = glGetUniformLocation(shader->program, "Projection");
+
+    // TODO(student): Set shader uniform "Projection" to projectionMatrix
+    //glm::mat4 projectionMatrix = GetSceneCamera()->GetProjectionMatrix();
+
+    glUniformMatrix4fv(location1, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    glUniformMatrix4fv(location2, 1, GL_FALSE, glm::value_ptr(camera->GetViewMatrix()));
+    glUniformMatrix4fv(location3, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+
+    // Draw the object
+    glBindVertexArray(mesh->GetBuffers()->m_VAO);
+    glDrawElements(mesh->GetDrawMode(), static_cast<int>(mesh->indices.size()), GL_UNSIGNED_INT, 0);
+}
+
+
+/*
+ *  These are callback functions. To find more about callbacks and
+ *  how they behave, see `input_controller.h`.
+ */
+
+
+void Tema2::OnInputUpdate(float deltaTime, int mods)
+{
+    // Add key press event
+    float movementSpeed = 7.5f;
+    float rotationSpeed = 1.0f;
+
+    if (window->KeyHold(GLFW_KEY_S))
+    { 
+        translateX -= glm::normalize(forward).x * movementSpeed * deltaTime;
+        translateZ -= glm::normalize(forward).z * movementSpeed * deltaTime;
+        camera->MoveForward(-movementSpeed * deltaTime);
+    }
+    if (window->KeyHold(GLFW_KEY_W))
+    {
+        translateX += glm::normalize(forward).x * movementSpeed * deltaTime;
+        translateZ += glm::normalize(forward).z * movementSpeed * deltaTime;
+        camera->MoveForward(movementSpeed * deltaTime); // nu merge bn nici S
+    }
+    if (window->KeyHold(GLFW_KEY_A))
+    {
+        angularStepOY += rotationSpeed * deltaTime;
+        forward = glm::normalize(glm::rotate(glm::mat4(1.0f), rotationSpeed * deltaTime, glm::vec3(0, 1, 0)) * glm::vec4(forward, 1));
+        camera->RotateThirdPerson_OY(rotationSpeed * deltaTime);
+    }
+        
+    if (window->KeyHold(GLFW_KEY_D))
+    {
+        angularStepOY -= rotationSpeed * deltaTime;
+        forward = glm::normalize(glm::rotate(glm::mat4(1.0f), -rotationSpeed * deltaTime, glm::vec3(0, 1, 0)) * glm::vec4(forward, 1));
+        camera->RotateThirdPerson_OY(-rotationSpeed * deltaTime);
+    }
+}
+
+
+void Tema2::OnKeyPress(int key, int mods)
+{
+    // Add key press event
+}
+
+
+void Tema2::OnKeyRelease(int key, int mods)
+{
+    // Add key release event
+}
+
+
+void Tema2::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
+{
+    // Add mouse move event
+}
+
+
+void Tema2::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
+{
+    // Add mouse button press event
+}
+
+
+void Tema2::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
+{
+    // Add mouse button release event
+}
+
+
+void Tema2::OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY)
+{
+}
+
+
+void Tema2::OnWindowResize(int width, int height)
+{
+}
