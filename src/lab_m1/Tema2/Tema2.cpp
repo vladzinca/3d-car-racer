@@ -27,9 +27,32 @@ Tema2::~Tema2()
 {
 }
 
+float Tema2::computeArea(glm::vec3 A, glm::vec3 B, glm::vec3 C)
+{
+    return  glm::length(glm::cross(B - A, C - A)) / 2.0f;
+}
+
+int Tema2::checkPoint(glm::vec3 A, glm::vec3 B, glm::vec3 C, glm::vec3 P)
+{
+    float totalArea = computeArea(A, B, C);
+    float area1 = computeArea(A, C, P);
+    float area2 = computeArea(A, B, P);
+    float area3 = computeArea(B, C, P);
+
+    if ((area1 + area2 + area3) == totalArea)
+        return 1;
+
+    return 0;
+}
+
+int Tema2::checkAll(std::vector<VertexFormat> vertices, glm::vec3 P)
+{
+    return 0;
+}
 
 void Tema2::Init()
 {
+    
     //{
     //    Mesh* mesh = new Mesh("box");
     //    mesh->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "primitives"), "box.obj");
@@ -66,6 +89,12 @@ void Tema2::Init()
     camera = new implement::Camera();
     camera->Set(glm::vec3(0, 2, 2), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
 
+    miniCamera = new implement::Camera();
+    miniCamera->Set(glm::vec3(0, 15, 0.1f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
+
+    glm::vec3 cameraPosition = glm::vec3(0, 2, 2);
+    glm::vec3 miniCameraPosition = glm::vec3(0, 15, 0.1f);
+
     translateX = 0;
     translateZ = 0;
 
@@ -74,12 +103,24 @@ void Tema2::Init()
     angularStepOY = 0;
 
     forward = glm::vec3(0, 0, -1);
+    rightV = glm::vec3(1, 0, 0);
 
     fov = 60.0f;
     zNear = 0.01f;
     zFar = 200.0f;
 
+    left = -15.0f;
+    right = 15.0f;
+    bottom = -7.5f;
+    up = 7.5f;
+
+    flag = 0;
+
+    //projectionMatrix = glm::ortho(left, right, bottom, up, zNear, zFar);
     projectionMatrix = glm::perspective(RADIANS(fov), window->props.aspectRatio, zNear, zFar);
+
+    glm::ivec2 resolution = window->GetResolution();
+    miniViewportArea = ViewportArea(50, 50, (int)(resolution.x / 4.0f), (int)(resolution.y / 4.0f));
 
     // Create a shader program for drawing face polygon with the color of the normal
     {
@@ -88,6 +129,12 @@ void Tema2::Init()
         shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "Tema2", "shaders", "FragmentShader.glsl"), GL_FRAGMENT_SHADER);
         shader->CreateAndLink();
         shaders[shader->GetName()] = shader;
+
+        Shader* shader2 = new Shader("LabShader2");
+        shader2->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "Tema2", "shaders", "VertexShader2.glsl"), GL_VERTEX_SHADER);
+        shader2->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "Tema2", "shaders", "FragmentShader2.glsl"), GL_FRAGMENT_SHADER);
+        shader2->CreateAndLink();
+        shaders[shader2->GetName()] = shader2;
     }
 
     //{
@@ -264,9 +311,7 @@ void Tema2::FrameStart()
     glViewport(0, 0, resolution.x, resolution.y);
 }
 
-
-void Tema2::Update(float deltaTimeSeconds)
-{
+void Tema2::RenderScene() {
     //{
     //    glm::mat4 modelMatrix = glm::mat4(1);
     //    modelMatrix = glm::translate(modelMatrix, glm::vec3(-2, 0.5f, 0));
@@ -338,10 +383,118 @@ void Tema2::Update(float deltaTimeSeconds)
     }
 }
 
+//...............//
+
+void Tema2::RenderScene2() {
+    //{
+    //    glm::mat4 modelMatrix = glm::mat4(1);
+    //    modelMatrix = glm::translate(modelMatrix, glm::vec3(-2, 0.5f, 0));
+    //    modelMatrix = glm::rotate(modelMatrix, RADIANS(60.0f), glm::vec3(1, 1, 0));
+    //    RenderMesh(meshes["box"], shaders["LabShader"], modelMatrix);
+    //}
+
+    //{
+    //    glm::mat4 modelMatrix = glm::mat4(1);
+    //    modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 1, 0));
+    //    modelMatrix = glm::rotate(modelMatrix, RADIANS(45.0f), glm::vec3(0, 1, 0));
+    //    modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f));
+    //    RenderSimpleMesh(meshes["cube"], shaders["VertexNormal"], modelMatrix);
+    //}
+
+    //{
+    //    glm::mat4 modelMatrix = glm::mat4(1);
+    //    modelMatrix = glm::translate(modelMatrix, glm::vec3(2, 0.5f, 0));
+    //    modelMatrix = glm::rotate(modelMatrix, RADIANS(60.0f), glm::vec3(1, 0, 0));
+    //    modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f));
+    //    RenderSimpleMesh(meshes["cube"], shaders["LabShader"], modelMatrix);
+    //}
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        RenderSimpleMesh2(meshes["myCube"], shaders["LabShader2"], modelMatrix);
+    }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        RenderSimpleMesh2(meshes["green_plane"], shaders["LabShader2"], modelMatrix);
+    }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        RenderSimpleMesh2(meshes["horizon_top"], shaders["LabShader2"], modelMatrix);
+    }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        RenderSimpleMesh2(meshes["horizon_back"], shaders["LabShader2"], modelMatrix);
+    }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        RenderSimpleMesh2(meshes["horizon_right"], shaders["LabShader2"], modelMatrix);
+    }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        RenderSimpleMesh2(meshes["horizon_front"], shaders["LabShader2"], modelMatrix);
+    }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        RenderSimpleMesh2(meshes["horizon_left"], shaders["LabShader2"], modelMatrix);
+    }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        RenderSimpleMesh2(meshes["road"], shaders["LabShader2"], modelMatrix);
+    }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix *= transf3D::Translate(translateX, 0, translateZ);
+        modelMatrix *= transf3D::RotateOY(angularStepOY);
+        RenderSimpleMesh2(meshes["car"], shaders["LabShader2"], modelMatrix);
+    }
+}
+
+
+
+void Tema2::Update(float deltaTimeSeconds)
+{
+    //cout<<checkPoint(glm::vec3(10, 0, 0), glm::vec3(0, 10, 0), glm::vec3(0, 0, 0), glm::vec3(0, 14, 0));
+    //camera->Set(camera->position, glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
+
+    glm::ivec2 resolution = window->GetResolution();
+    glViewport(0, 0, resolution.x, resolution.y);
+
+    RenderScene();
+
+
+    //DrawCoordinateSystem();
+
+    //projectionMatrix = glm::ortho(left, right, bottom, up, zNear, zFar);
+    //camera->Set(glm::vec3(0, 5, 0.1f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
+
+  
+    //camera->position = glm::vec3(transf3D::Translate(0, 10, 6) * glm::vec4(camera->position, 1));
+    //camera->RotateThirdPerson_OX(-120);
+    //projectionMatrix = glm::ortho(left, right, bottom, up, zNear, zFar);
+
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glViewport(miniViewportArea.x, miniViewportArea.y, miniViewportArea.width, miniViewportArea.height);
+
+    // TODO(student): render the scene again, in the new viewport
+    RenderScene2();
+
+    // camera->RotateThirdPerson_OX(120);
+    //projectionMatrix = glm::perspective(RADIANS(fov), window->props.aspectRatio, zNear, zFar);
+    //DrawCoordinateSystem();
+}
+
 
 void Tema2::FrameEnd()
 {
-    DrawCoordinateSystem(camera->GetViewMatrix(), projectionMatrix);
+    //DrawCoordinateSystem(camera->GetViewMatrix(), projectionMatrix);
 }
 
 
@@ -372,12 +525,63 @@ void Tema2::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & model
     // TODO(student): Get shader location for uniform mat4 "Projection"
     int location3 = glGetUniformLocation(shader->program, "Projection");
 
-    // TODO(student): Set shader uniform "Projection" to projectionMatrix
-    //glm::mat4 projectionMatrix = GetSceneCamera()->GetProjectionMatrix();
+    projectionMatrix = glm::perspective(RADIANS(fov), window->props.aspectRatio, zNear, zFar);
+
 
     glUniformMatrix4fv(location1, 1, GL_FALSE, glm::value_ptr(modelMatrix));
     glUniformMatrix4fv(location2, 1, GL_FALSE, glm::value_ptr(camera->GetViewMatrix()));
     glUniformMatrix4fv(location3, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+
+    //glUniformMatrix4fv(location4, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    //glUniformMatrix4fv(location5, 1, GL_FALSE, glm::value_ptr(miniCamera->GetViewMatrix()));
+    //glUniformMatrix4fv(location6, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+
+    // Draw the object
+    glBindVertexArray(mesh->GetBuffers()->m_VAO);
+    glDrawElements(mesh->GetDrawMode(), static_cast<int>(mesh->indices.size()), GL_UNSIGNED_INT, 0);
+
+
+    //..................................................//
+
+    
+}
+
+void Tema2::RenderSimpleMesh2(Mesh* mesh, Shader* shader2, const glm::mat4& modelMatrix)
+{
+    if (!mesh || !shader2 || !shader2->GetProgramID())
+        return;
+
+    glUseProgram(shader2->program);
+
+    // TODO(student): Get shader location for uniform mat4 "Model"
+    int location4 = glGetUniformLocation(shader2->program, "Model");
+    //int location = glGetUniformLocation(shader->program, "Nume1");
+    //glUniform1f(location, 3.12312f);
+    //glUniform1i(location, 3); // daca vreau sa trimit un int
+    //glUniform3f(location, /* 3 float-uri */);
+
+    // TODO(student): Set shader uniform "Model" to modelMatrix
+
+    // TODO(student): Get shader location for uniform mat4 "View"
+    int location5 = glGetUniformLocation(shader2->program, "View");
+
+    // TODO(student): Set shader uniform "View" to viewMatrix
+    //glm::mat4 viewMatrix = camera->GetViewMatrix();
+    //glm::mat4 viewMatrix = GetSceneCamera()->GetViewMatrix();
+
+    // TODO(student): Get shader location for uniform mat4 "Projection"
+    int location6 = glGetUniformLocation(shader2->program, "Projection");
+
+    projectionMatrix = glm::ortho(left, right, bottom, up, zNear, zFar);
+
+
+    glUniformMatrix4fv(location4, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    glUniformMatrix4fv(location5, 1, GL_FALSE, glm::value_ptr(miniCamera->GetViewMatrix()));
+    glUniformMatrix4fv(location6, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+
+    //glUniformMatrix4fv(location4, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    //glUniformMatrix4fv(location5, 1, GL_FALSE, glm::value_ptr(miniCamera->GetViewMatrix()));
+    //glUniformMatrix4fv(location6, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
     // Draw the object
     glBindVertexArray(mesh->GetBuffers()->m_VAO);
@@ -402,12 +606,17 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
         translateX -= glm::normalize(forward).x * movementSpeed * deltaTime;
         translateZ -= glm::normalize(forward).z * movementSpeed * deltaTime;
         camera->MoveForward(-movementSpeed * deltaTime);
+        
+        miniCamera->position = glm::vec3(translateX, 15, translateZ);
     }
     if (window->KeyHold(GLFW_KEY_W))
     {
         translateX += glm::normalize(forward).x * movementSpeed * deltaTime;
         translateZ += glm::normalize(forward).z * movementSpeed * deltaTime;
         camera->MoveForward(movementSpeed * deltaTime); // nu merge bn nici S
+        
+        //miniCamera->MoveForward(movementSpeed * deltaTime); // nu merge bn nici S
+        miniCamera->position = glm::vec3(translateX, 15, translateZ);
     }
     if (window->KeyHold(GLFW_KEY_A))
     {
@@ -415,12 +624,21 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
         forward = glm::normalize(glm::rotate(glm::mat4(1.0f), rotationSpeed * deltaTime, glm::vec3(0, 1, 0)) * glm::vec4(forward, 1));
         camera->RotateThirdPerson_OY(rotationSpeed * deltaTime);
     }
+
         
     if (window->KeyHold(GLFW_KEY_D))
     {
         angularStepOY -= rotationSpeed * deltaTime;
         forward = glm::normalize(glm::rotate(glm::mat4(1.0f), -rotationSpeed * deltaTime, glm::vec3(0, 1, 0)) * glm::vec4(forward, 1));
+        //rightV = glm::normalize(glm::rotate(glm::mat4(1.0f), -rotationSpeed * deltaTime, glm::vec3(0, 1, 0)) * glm::vec4(rightV, 1));
         camera->RotateThirdPerson_OY(-rotationSpeed * deltaTime);
+        //miniCamera->forward = glm::normalize(forward);
+        //cout << "forward: " << forward << "\n";
+        //cout << "camera->forward: " << camera->forward << "\n";
+        //cout << "miniCamera->forward: " << miniCamera->forward << "\n";
+        //miniCamera->forward = forward;
+        //miniCamera->right = rightV;
+        //cout << camera->forward << "\n";
     }
 }
 

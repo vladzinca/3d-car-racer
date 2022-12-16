@@ -13,8 +13,8 @@ Mesh* obj3D::GenerateCompleteRoad(
 {
     std::vector<VertexFormat> vertices;
 
-    float redDistance = 0.6f;
-    float blueDistance = 0.45f;
+    float redDistance = 0.5f;
+    float blueDistance = 0.375f;
 
     for (int i = 0; i < pointCount - 1; i++)
     {
