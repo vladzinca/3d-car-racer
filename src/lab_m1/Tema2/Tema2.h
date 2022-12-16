@@ -52,7 +52,7 @@ namespace m1
 
         float computeArea(glm::vec3 A, glm::vec3 B, glm::vec3 C);
         int checkPoint(glm::vec3 A, glm::vec3 B, glm::vec3 C, glm::vec3 P);
-        int checkAll(std::vector<VertexFormat> vertices, glm::vec3 P);
+        int checkAll(std::vector<glm::vec3> points, int pointCount, glm::vec3 P);
 
         float translateX, translateZ;
         float angularStepOY;
@@ -73,5 +73,8 @@ namespace m1
         glm::vec3 cameraPosition;
         glm::vec3 miniCameraPosition;
         int flag;
+
+        std::vector<glm::vec3> roadPoints;
+        int roadPointCount;
     };
 }   // namespace m1

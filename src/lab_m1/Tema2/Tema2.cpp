@@ -39,14 +39,53 @@ int Tema2::checkPoint(glm::vec3 A, glm::vec3 B, glm::vec3 C, glm::vec3 P)
     float area2 = computeArea(A, B, P);
     float area3 = computeArea(B, C, P);
 
-    if ((area1 + area2 + area3) == totalArea)
+    if (abs((area1 + area2 + area3) - totalArea) < 0.0001)
         return 1;
 
     return 0;
 }
 
-int Tema2::checkAll(std::vector<VertexFormat> vertices, glm::vec3 P)
+int Tema2::checkAll(std::vector<glm::vec3> points, int pointCount, glm::vec3 P)
 {
+    std::vector<glm::vec3> vertices;
+
+    float redDistance = 2.5f;
+    float blueDistance = 1.5f;
+
+    for (int i = 0; i < pointCount - 1; i++)
+    {
+        glm::vec3 d = points[i + 1] - points[i];
+        d = glm::normalize(d);
+        glm::vec3 up = glm::vec3(0, 1, 0);
+        glm::vec3 p = glm::cross(d, up);
+        glm::vec3 r = points[i] + redDistance * p;
+        glm::vec3 b = points[i] - blueDistance * p;
+        vertices.push_back(r);
+        vertices.push_back(b);
+    }
+
+    glm::vec3 d = points[0] - points[pointCount - 1];
+    d = glm::normalize(d);
+    glm::vec3 up = glm::vec3(0, 1, 0);
+    glm::vec3 p = glm::cross(d, up);
+    glm::vec3 r = points[pointCount - 1] + redDistance * p;
+    glm::vec3 b = points[pointCount - 1] - blueDistance * p;
+    vertices.push_back(r);
+    vertices.push_back(b);
+
+    for (int i = 0; i < pointCount - 1; i++)
+    {
+        if (checkPoint(vertices[2 * i], vertices[2 * i + 1], vertices[2 * i + 3], P))
+            return 1;
+        if (checkPoint(vertices[2 * i], vertices[2 * i + 2], vertices[2 * i + 3], P))
+            return 1;
+    }
+
+    if (checkPoint(vertices[2 * (pointCount - 1)], vertices[2 * (pointCount - 1) + 1], vertices[1], P))
+        return 1;
+    if (checkPoint(vertices[2 * (pointCount - 1)], vertices[0], vertices[1], P))
+        return 1;
+
     return 0;
 }
 
@@ -165,9 +204,8 @@ void Tema2::Init()
     Mesh* horizon_left = obj3D::CreateCuboid("horizon_left", glm::vec3(-64, 0, -64), 0.1f, 64, 128, glm::vec3(0.5f, 0.8f, 0.9f));
     AddMeshToList(horizon_left);
 
-    int roadPointCount = 40;
-
-    vector<glm::vec3> roadPoints;
+    roadPointCount = 40;
+    
     roadPoints.push_back(glm::vec3(33.65f, 0.13f, 5.15f)); // A
     roadPoints.push_back(glm::vec3(30.53f, 0.13f, 8.93f));
     roadPoints.push_back(glm::vec3(26.83f, 0.13f, 13.31f));
@@ -601,7 +639,7 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
     float movementSpeed = 7.5f;
     float rotationSpeed = 1.0f;
 
-    if (window->KeyHold(GLFW_KEY_S))
+    if (window->KeyHold(GLFW_KEY_S) && checkAll(roadPoints, roadPointCount, glm::vec3(translateX - glm::normalize(forward).x * movementSpeed * deltaTime, 0.13f, translateZ - glm::normalize(forward).z * movementSpeed * deltaTime)))
     { 
         translateX -= glm::normalize(forward).x * movementSpeed * deltaTime;
         translateZ -= glm::normalize(forward).z * movementSpeed * deltaTime;
@@ -609,7 +647,7 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
         
         miniCamera->position = glm::vec3(translateX, 15, translateZ);
     }
-    if (window->KeyHold(GLFW_KEY_W))
+    if (window->KeyHold(GLFW_KEY_W) && checkAll(roadPoints, roadPointCount, glm::vec3(translateX + glm::normalize(forward).x * movementSpeed * deltaTime, 0.13f, translateZ + glm::normalize(forward).z * movementSpeed * deltaTime)))
     {
         translateX += glm::normalize(forward).x * movementSpeed * deltaTime;
         translateZ += glm::normalize(forward).z * movementSpeed * deltaTime;

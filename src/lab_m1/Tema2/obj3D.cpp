@@ -13,12 +13,13 @@ Mesh* obj3D::GenerateCompleteRoad(
 {
     std::vector<VertexFormat> vertices;
 
-    float redDistance = 0.5f;
-    float blueDistance = 0.375f;
+    float redDistance = 2.5f;
+    float blueDistance = 1.5f;
 
     for (int i = 0; i < pointCount - 1; i++)
     {
         glm::vec3 d = points[i + 1] - points[i];
+        d = glm::normalize(d);
         glm::vec3 up = glm::vec3(0, 1, 0);
         glm::vec3 p = glm::cross(d, up);
         glm::vec3 r = points[i] + redDistance * p;
@@ -28,6 +29,7 @@ Mesh* obj3D::GenerateCompleteRoad(
     }
 
     glm::vec3 d = points[0] - points[pointCount - 1];
+    d = glm::normalize(d);
     glm::vec3 up = glm::vec3(0, 1, 0);
     glm::vec3 p = glm::cross(d, up);
     glm::vec3 r = points[pointCount - 1] + redDistance * p;
