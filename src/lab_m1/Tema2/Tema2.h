@@ -57,22 +57,23 @@ namespace m1
         float translateX, translateZ;
         float angularStepOY;
 
-        glm::vec3 enemy1_position;
-        float enemy1_translateX, enemy1_translateZ;
-        float enemy1_angularStepOY;
+        glm::vec3 purpleEnemy_position, yellowEnemy_position;
+        float purpleEnemy_translateX, purpleEnemy_translateZ, yellowEnemy_translateX, yellowEnemy_translateZ;
+        float purpleEnemy_angularStepOY, yellowEnemy_angularStepOY;
 
-        glm::vec3 enemy1_forward;
-        int enemy1_counter;
+        glm::vec3 purpleEnemy_forward, yellowEnemy_forward;
+        int purpleEnemy_counter, yellowEnemy_counter;
         
         glm::vec3 position;
         glm::vec3 forward;
-        glm::vec3 rightV;
         float cx, cz;
 
         std::vector<glm::vec3> directions;
-        float enemy1Distance, enemy2Distance;
-        std::vector<glm::vec3> enemy1Points;
-        std::vector<glm::vec3> enemy2Points;
+        float purpleEnemyDistance, yellowEnemyDistance;
+        std::vector<glm::vec3> purpleEnemyPoints;
+        std::vector<glm::vec3> yellowEnemyPoints;
+        std::vector<glm::vec3> purpleEnemyDirections;
+        std::vector<glm::vec3> yellowEnemyDirections;
 
     protected:
         implement::Camera* camera;
@@ -85,7 +86,7 @@ namespace m1
         ViewportArea miniViewportArea;
         glm::vec3 cameraPosition;
         glm::vec3 miniCameraPosition;
-        int flag, flag2;
+        int flag;
 
         std::vector<glm::vec3> roadPoints;
         int roadPointCount;

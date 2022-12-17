@@ -141,10 +141,7 @@ void Tema2::Init()
 
     angularStepOY = 0;
 
-
-
     forward = glm::vec3(0, 0, -1);
-    rightV = glm::vec3(1, 0, 0);
 
     fov = 60.0f;
     zNear = 0.01f;
@@ -154,8 +151,6 @@ void Tema2::Init()
     right = 15.0f;
     bottom = -7.5f;
     up = 7.5f;
-
-    flag = 0;
 
     //projectionMatrix = glm::ortho(left, right, bottom, up, zNear, zFar);
     projectionMatrix = glm::perspective(RADIANS(fov), window->props.aspectRatio, zNear, zFar);
@@ -258,16 +253,63 @@ void Tema2::Init()
     roadPoints.push_back(glm::vec3(38.74f, 0.13f, -2.69f));
     roadPoints.push_back(glm::vec3(36.57f, 0.13f, 1.09f));
 
+    purpleEnemyDistance = ((float)(rand() % 15 + 5)) / 10.0f;
+    yellowEnemyDistance = ((float)(rand() % 5 + 5)) / 10.0f;
     
     for (int i = 0; i < 39; i++)
     {
         glm::vec3 d = glm::normalize(roadPoints[i + 1] - roadPoints[i]);
         directions.push_back(d);
+        glm::vec3 up = glm::vec3(0, 1, 0);
+        glm::vec3 p = glm::cross(d, up);
+        glm::vec3 r = roadPoints[i] + purpleEnemyDistance * p;
+        glm::vec3 b = roadPoints[i] - yellowEnemyDistance * p;
+        purpleEnemyPoints.push_back(r);
+        yellowEnemyPoints.push_back(b);
     }
-    directions.push_back(glm::normalize(roadPoints[0] - roadPoints[39]));
+    glm::vec3 d = glm::normalize(roadPoints[0] - roadPoints[39]);
+    directions.push_back(d);
+    glm::vec3 up = glm::vec3(0, 1, 0);
+    glm::vec3 p = glm::cross(d, up);
+    glm::vec3 r = roadPoints[39] + purpleEnemyDistance * p;
+    glm::vec3 b = roadPoints[39] - yellowEnemyDistance * p;
+    purpleEnemyPoints.push_back(r);
+    yellowEnemyPoints.push_back(b);
 
-    for (int i = 0; i < 40; i++)
-        cout << i << " " << directions[i] << "\n";
+    for (int i = 0; i < 39; i++)
+    {
+        glm::vec3 d1 = glm::normalize(purpleEnemyPoints[i + 1] - purpleEnemyPoints[i]);
+        glm::vec3 d2 = glm::normalize(yellowEnemyPoints[i + 1] - yellowEnemyPoints[i]);
+        purpleEnemyDirections.push_back(d1);
+        yellowEnemyDirections.push_back(d2);
+    }
+    purpleEnemyDirections.push_back(glm::normalize(purpleEnemyPoints[0] - purpleEnemyPoints[39]));
+    yellowEnemyDirections.push_back(glm::normalize(yellowEnemyPoints[0] - yellowEnemyPoints[39]));
+
+    cx = 0.25f;
+    cz = 0.5f;
+
+    purpleEnemy_counter = 11;
+    purpleEnemy_forward = purpleEnemyDirections[10];
+    purpleEnemy_position = purpleEnemyPoints[10];
+
+    purpleEnemy_translateX = purpleEnemy_position.x - 0.25f;
+    purpleEnemy_translateZ = purpleEnemy_position.z - 0.5f;
+
+    purpleEnemy_angularStepOY = atan2(purpleEnemy_forward.x, purpleEnemy_forward.z) - atan2(0, -1);
+
+
+    yellowEnemy_counter = 11;
+    yellowEnemy_forward = -yellowEnemyDirections[11];
+    yellowEnemy_position = yellowEnemyPoints[12];
+
+    yellowEnemy_translateX = yellowEnemy_position.x - 0.25f;
+    yellowEnemy_translateZ = yellowEnemy_position.z - 0.5f;
+
+    yellowEnemy_angularStepOY = atan2(yellowEnemy_forward.x, yellowEnemy_forward.z) - atan2(0, -1);
+
+    //for (int i = 0; i < 40; i++)
+    //    cout << i << " " << directions[i] << "\n";
 
     //enemy1Distance = 2.5f;
     //enemy1Distance = ((float)(rand() % 15 + 5)) / 10.0f;
@@ -292,32 +334,17 @@ void Tema2::Init()
     //for (int i = 0; i < 40; i++)
         //cout << i << ": " << enemy1Points[i] << "\n";
 
-    flag2 = 0;
-
-    enemy1_forward = glm::vec3(0, 0, -1);
-    enemy1_angularStepOY = 0; // acos(glm::dot(enemy1_forward, directions[10]) / (glm::length(enemy1_forward) * glm::length(directions[10])));
-         
-    enemy1_counter = 11;
-    enemy1_forward = directions[10];
-    enemy1_position = roadPoints[10];
-
-    cx = 0.25f;
-    cz = 0.5f;
-
-    enemy1_translateX = enemy1_position.x - 0.25f;
-    enemy1_translateZ = enemy1_position.z - 0.5f;
-
     Mesh* road = obj3D::GenerateCompleteRoad("road", roadPoints, roadPointCount, glm::vec3(0.2f, 0.2f, 0.2f));
     AddMeshToList(road);
 
     Mesh* car = obj3D::CreateCuboid("car", position, 0.5f, 0.5f, 1.0f, glm::vec3(0, 1, 1));
     AddMeshToList(car);
 
-    Mesh* enemy1  = obj3D::CreateCuboid("enemy1", glm::vec3(0, 0.15f, 0), 0.5f, 0.5f, 1.0f, glm::vec3(0.73f, 0, 0.96f));
-    AddMeshToList(enemy1);
+    Mesh* purpleEnemy = obj3D::CreateCuboid("purpleEnemy", glm::vec3(0, 0.15f, 0), 0.5f, 0.5f, 1.0f, glm::vec3(0.73f, 0, 0.96f));
+    AddMeshToList(purpleEnemy);
 
-    //Mesh* testCube = obj3D::CreateCube("testCube", glm::vec3(-25, 0.15f, 5), 0.5f, glm::vec3(1, 1, 0));
-    //AddMeshToList(testCube);
+    Mesh* yellowEnemy = obj3D::CreateCuboid("yellowEnemy", glm::vec3(0, 0.15f, 0), 0.5f, 0.5f, 1.0f, glm::vec3(0.94f, 0.94f, 0));
+    AddMeshToList(yellowEnemy);
 }
 
 
@@ -404,29 +431,6 @@ void Tema2::FrameStart()
 }
 
 void Tema2::RenderScene() {
-    //{
-    //    glm::mat4 modelMatrix = glm::mat4(1);
-    //    modelMatrix = glm::translate(modelMatrix, glm::vec3(-2, 0.5f, 0));
-    //    modelMatrix = glm::rotate(modelMatrix, RADIANS(60.0f), glm::vec3(1, 1, 0));
-    //    RenderMesh(meshes["box"], shaders["LabShader"], modelMatrix);
-    //}
-
-    //{
-    //    glm::mat4 modelMatrix = glm::mat4(1);
-    //    modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 1, 0));
-    //    modelMatrix = glm::rotate(modelMatrix, RADIANS(45.0f), glm::vec3(0, 1, 0));
-    //    modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f));
-    //    RenderSimpleMesh(meshes["cube"], shaders["VertexNormal"], modelMatrix);
-    //}
-
-    //{
-    //    glm::mat4 modelMatrix = glm::mat4(1);
-    //    modelMatrix = glm::translate(modelMatrix, glm::vec3(2, 0.5f, 0));
-    //    modelMatrix = glm::rotate(modelMatrix, RADIANS(60.0f), glm::vec3(1, 0, 0));
-    //    modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f));
-    //    RenderSimpleMesh(meshes["cube"], shaders["LabShader"], modelMatrix);
-    //}
-
     {
         glm::mat4 modelMatrix = glm::mat4(1);
         RenderSimpleMesh(meshes["myCube"], shaders["LabShader"], modelMatrix);
@@ -476,40 +480,26 @@ void Tema2::RenderScene() {
 
     {
         glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(enemy1_translateX, 0, enemy1_translateZ);
+        modelMatrix *= transf3D::Translate(purpleEnemy_translateX, 0, purpleEnemy_translateZ);
         modelMatrix *= transf3D::Translate(cx, 0, cz);
-        modelMatrix *= transf3D::RotateOY(enemy1_angularStepOY);
+        modelMatrix *= transf3D::RotateOY(purpleEnemy_angularStepOY);
         modelMatrix *= transf3D::Translate(-cx, 0, -cz);
-        RenderSimpleMesh(meshes["enemy1"], shaders["LabShader"], modelMatrix);
+        RenderSimpleMesh(meshes["purpleEnemy"], shaders["LabShader"], modelMatrix);
+    }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix *= transf3D::Translate(yellowEnemy_translateX, 0, yellowEnemy_translateZ);
+        modelMatrix *= transf3D::Translate(cx, 0, cz);
+        modelMatrix *= transf3D::RotateOY(yellowEnemy_angularStepOY);
+        modelMatrix *= transf3D::Translate(-cx, 0, -cz);
+        RenderSimpleMesh(meshes["yellowEnemy"], shaders["LabShader"], modelMatrix);
     }
 }
 
 //...............//
 
 void Tema2::RenderScene2() {
-    //{
-    //    glm::mat4 modelMatrix = glm::mat4(1);
-    //    modelMatrix = glm::translate(modelMatrix, glm::vec3(-2, 0.5f, 0));
-    //    modelMatrix = glm::rotate(modelMatrix, RADIANS(60.0f), glm::vec3(1, 1, 0));
-    //    RenderMesh(meshes["box"], shaders["LabShader"], modelMatrix);
-    //}
-
-    //{
-    //    glm::mat4 modelMatrix = glm::mat4(1);
-    //    modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 1, 0));
-    //    modelMatrix = glm::rotate(modelMatrix, RADIANS(45.0f), glm::vec3(0, 1, 0));
-    //    modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f));
-    //    RenderSimpleMesh(meshes["cube"], shaders["VertexNormal"], modelMatrix);
-    //}
-
-    //{
-    //    glm::mat4 modelMatrix = glm::mat4(1);
-    //    modelMatrix = glm::translate(modelMatrix, glm::vec3(2, 0.5f, 0));
-    //    modelMatrix = glm::rotate(modelMatrix, RADIANS(60.0f), glm::vec3(1, 0, 0));
-    //    modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f));
-    //    RenderSimpleMesh(meshes["cube"], shaders["LabShader"], modelMatrix);
-    //}
-
     {
         glm::mat4 modelMatrix = glm::mat4(1);
         RenderSimpleMesh2(meshes["myCube"], shaders["LabShader2"], modelMatrix);
@@ -559,9 +549,20 @@ void Tema2::RenderScene2() {
 
     {
         glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(enemy1_translateX, 0, enemy1_translateZ);
-        modelMatrix *= transf3D::RotateOY(enemy1_angularStepOY);
-        RenderSimpleMesh2(meshes["enemy1"], shaders["LabShader"], modelMatrix);
+        modelMatrix *= transf3D::Translate(purpleEnemy_translateX, 0, purpleEnemy_translateZ);
+        modelMatrix *= transf3D::Translate(cx, 0, cz);
+        modelMatrix *= transf3D::RotateOY(purpleEnemy_angularStepOY);
+        modelMatrix *= transf3D::Translate(-cx, 0, -cz);
+        RenderSimpleMesh2(meshes["purpleEnemy"], shaders["LabShader"], modelMatrix);
+    }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix *= transf3D::Translate(yellowEnemy_translateX, 0, yellowEnemy_translateZ);
+        modelMatrix *= transf3D::Translate(cx, 0, cz);
+        modelMatrix *= transf3D::RotateOY(yellowEnemy_angularStepOY);
+        modelMatrix *= transf3D::Translate(-cx, 0, -cz);
+        RenderSimpleMesh2(meshes["yellowEnemy"], shaders["LabShader"], modelMatrix);
     }
 }
 
@@ -569,49 +570,59 @@ void Tema2::RenderScene2() {
 
 void Tema2::Update(float deltaTimeSeconds)
 {
-    //cout<<checkPoint(glm::vec3(10, 0, 0), glm::vec3(0, 10, 0), glm::vec3(0, 0, 0), glm::vec3(0, 14, 0));
-    //camera->Set(camera->position, glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
-
     glm::ivec2 resolution = window->GetResolution();
     glViewport(0, 0, resolution.x, resolution.y);
 
-    if (flag2 == 0)
-    {
-        enemy1_angularStepOY = atan2(enemy1_forward.x, enemy1_forward.z) - atan2(0, -1);
-        flag2 = 1;
-    }
+    float enemyMovementSpeed = 5.0f;
 
-    //float movementSpeed = 10.0f;
-
-    //if (enemy1_counter < 21)
-        //cout << "enemy1_translateX " << enemy1_translateX << " + enemy1Points[enemy1_counter].x " << enemy1Points[enemy1_counter].x << "\n";
-    if ((glm::abs(enemy1_translateX + 0.25f - roadPoints[enemy1_counter].x) < 0.1f) && (glm::abs(enemy1_translateZ + 0.5f - roadPoints[enemy1_counter].z) < 0.1f))
+    if ((glm::abs(purpleEnemy_translateX + 0.25f - purpleEnemyPoints[purpleEnemy_counter].x) < 0.1f) && (glm::abs(purpleEnemy_translateZ + 0.5f - purpleEnemyPoints[purpleEnemy_counter].z) < 0.1f))
     {
-        //cout << enemy1_counter + 1 << "\n";
-        enemy1_translateX = roadPoints[enemy1_counter].x - 0.25f;
-        enemy1_translateZ = roadPoints[enemy1_counter].z - 0.5f;
-        enemy1_forward = directions[enemy1_counter];
-        enemy1_angularStepOY = atan2(enemy1_forward.x, enemy1_forward.z) - atan2(0, -1);
-        if (enemy1_angularStepOY < 0)
-        {
-            enemy1_angularStepOY += 2 * M_PI;
-        }
-        if (enemy1_counter == 39)
-            enemy1_counter = 0;
+        purpleEnemy_translateX = purpleEnemyPoints[purpleEnemy_counter].x - 0.25f;
+        purpleEnemy_translateZ = purpleEnemyPoints[purpleEnemy_counter].z - 0.5f;
+
+        purpleEnemy_forward = purpleEnemyDirections[purpleEnemy_counter];
+
+        purpleEnemy_angularStepOY = atan2(purpleEnemy_forward.x, purpleEnemy_forward.z) - atan2(0, -1);
+
+        if (purpleEnemy_angularStepOY < 0)
+            purpleEnemy_angularStepOY += 2 * M_PI;
+
+        if (purpleEnemy_counter == 39)
+            purpleEnemy_counter = 0;
         else
-            enemy1_counter++;
+            purpleEnemy_counter++;
     }
     else
     {
-        enemy1_translateX += glm::normalize(enemy1_forward).x * deltaTimeSeconds;
-        enemy1_translateZ += glm::normalize(enemy1_forward).z * deltaTimeSeconds;
-        //cout << "x: " << enemy1_position.x + enemy1_translateX << " " << enemy1Points[enemy1_counter].x << "\n";
-        //cout << "z: " << enemy1_position.z + enemy1_translateZ << " " << enemy1Points[enemy1_counter].z << "\n";
-
+        purpleEnemy_translateX += glm::normalize(purpleEnemy_forward).x * enemyMovementSpeed * deltaTimeSeconds;
+        purpleEnemy_translateZ += glm::normalize(purpleEnemy_forward).z * enemyMovementSpeed * deltaTimeSeconds;
     }
 
-    //enemy1_translateX = cx + 0.25f;
-    //enemy1_translateZ = cz + 0.5f;
+    if ((glm::abs(yellowEnemy_translateX + 0.25f - yellowEnemyPoints[yellowEnemy_counter].x) < 0.1f) && (glm::abs(yellowEnemy_translateZ + 0.5f - yellowEnemyPoints[yellowEnemy_counter].z) < 0.1f))
+    {
+        yellowEnemy_translateX = yellowEnemyPoints[yellowEnemy_counter].x - 0.25f;
+        yellowEnemy_translateZ = yellowEnemyPoints[yellowEnemy_counter].z - 0.5f;
+
+        if (yellowEnemy_counter == 0)
+            yellowEnemy_forward = -yellowEnemyDirections[39];
+        else
+            yellowEnemy_forward = -yellowEnemyDirections[yellowEnemy_counter - 1];
+
+        yellowEnemy_angularStepOY = atan2(yellowEnemy_forward.x, yellowEnemy_forward.z) - atan2(0, -1);
+
+        if (yellowEnemy_angularStepOY < 0)
+            yellowEnemy_angularStepOY += 2 * M_PI;
+
+        if (yellowEnemy_counter == 0)
+            yellowEnemy_counter = 39;
+        else
+            yellowEnemy_counter--;
+    }
+    else
+    {
+        yellowEnemy_translateX += glm::normalize(yellowEnemy_forward).x * enemyMovementSpeed * deltaTimeSeconds;
+        yellowEnemy_translateZ += glm::normalize(yellowEnemy_forward).z * enemyMovementSpeed * deltaTimeSeconds;
+    }
 
     RenderScene();
 

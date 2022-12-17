@@ -1,6 +1,6 @@
 #include "obj3D.h"
 
-#include <iostream> // sterge
+//#include <iostream> // sterge
 #include <vector>
 
 #include "core/engine.h"
@@ -17,13 +17,13 @@ Mesh* obj3D::GenerateCompleteRoad(
     float redDistance = 2.5f;
     float blueDistance = 1.5f;
     //float blueDistance = 2.5f;
-    std::cout << "Urmeaza pista:\n";
+    //std::cout << "Urmeaza pista:\n";
 
     for (int i = 0; i < pointCount - 1; i++)
     {
         glm::vec3 d = points[i + 1] - points[i];
         d = glm::normalize(d);
-        std::cout << i << " " << d << "\n";
+        //std::cout << i << " " << d << "\n";
         glm::vec3 up = glm::vec3(0, 1, 0);
         glm::vec3 p = glm::cross(d, up);
         glm::vec3 r = points[i] + redDistance * p;
@@ -35,11 +35,11 @@ Mesh* obj3D::GenerateCompleteRoad(
 
     glm::vec3 d = points[0] - points[pointCount - 1];
     d = glm::normalize(d);
-    std::cout << "39 " << d << "\n";
+    //std::cout << "39 " << d << "\n";
     glm::vec3 up = glm::vec3(0, 1, 0);
     glm::vec3 p = glm::cross(d, up);
     glm::vec3 r = points[pointCount - 1] + redDistance * p;
-    std::cout << "39: " << r << "\n";
+    //std::cout << "39: " << r << "\n";
     glm::vec3 b = points[pointCount - 1] - blueDistance * p;
     vertices.push_back(VertexFormat(r, glm::vec3(1), color));
     vertices.push_back(VertexFormat(b, glm::vec3(1), color));
