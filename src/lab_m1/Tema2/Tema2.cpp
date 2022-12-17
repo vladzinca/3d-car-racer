@@ -266,6 +266,9 @@ void Tema2::Init()
 
     purpleEnemyDistance = ((float)(rand() % 15 + 5)) / 10.0f;
     yellowEnemyDistance = ((float)(rand() % 5 + 5)) / 10.0f;
+
+    float treeRedDistance = 5.0f;
+    float treeBlueDistance = 3.0f;
     
     for (int i = 0; i < 39; i++)
     {
@@ -275,8 +278,12 @@ void Tema2::Init()
         glm::vec3 p = glm::cross(d, up);
         glm::vec3 r = roadPoints[i] + purpleEnemyDistance * p;
         glm::vec3 b = roadPoints[i] - yellowEnemyDistance * p;
+        glm::vec3 tr = roadPoints[i] + treeRedDistance * p;
+        glm::vec3 tb = roadPoints[i] - treeBlueDistance * p;
         purpleEnemyPoints.push_back(r);
         yellowEnemyPoints.push_back(b);
+        treeCoordinates.push_back(tr);
+        treeCoordinates.push_back(tb);
     }
     glm::vec3 d = glm::normalize(roadPoints[0] - roadPoints[39]);
     directions.push_back(d);
@@ -284,8 +291,12 @@ void Tema2::Init()
     glm::vec3 p = glm::cross(d, up);
     glm::vec3 r = roadPoints[39] + purpleEnemyDistance * p;
     glm::vec3 b = roadPoints[39] - yellowEnemyDistance * p;
+    glm::vec3 tr = roadPoints[39] + treeRedDistance * p;
+    glm::vec3 tb = roadPoints[39] - treeBlueDistance * p;
     purpleEnemyPoints.push_back(r);
     yellowEnemyPoints.push_back(b);
+    treeCoordinates.push_back(tr);
+    treeCoordinates.push_back(tb);
 
     for (int i = 0; i < 39; i++)
     {
@@ -357,53 +368,17 @@ void Tema2::Init()
     Mesh* yellowEnemy = obj3D::CreateCuboid("yellowEnemy", glm::vec3(0, 0.15f, 0), 0.5f, 0.5f, 1.0f, glm::vec3(0.94f, 0.94f, 0));
     AddMeshToList(yellowEnemy);
 
-    Mesh* tree1 = obj3D::CreateTree("tree1", glm::vec3(0, 0, 0), 0.5f, 1, 2, glm::vec3(0.44f, 0.35f, 0.28f), glm::vec3(0.35f, 0.5f, 0.28f));
-    AddMeshToList(tree1);
+    for (int i = 0; i < 80; i++)
+    {
+        treeNames.push_back("tree" + std::to_string(i));
+    }
 
-    Mesh* tree2 = obj3D::CreateTree("tree2", glm::vec3(0, 0, 0), 0.5f, 1, 2, glm::vec3(0.44f, 0.35f, 0.28f), glm::vec3(0.35f, 0.5f, 0.28f));
-    AddMeshToList(tree2);
-
-    Mesh* tree3 = obj3D::CreateTree("tree3", glm::vec3(0, 0, 0), 0.5f, 1, 2, glm::vec3(0.44f, 0.35f, 0.28f), glm::vec3(0.35f, 0.5f, 0.28f));
-    AddMeshToList(tree3);
-
-    Mesh* tree4 = obj3D::CreateTree("tree4", glm::vec3(0, 0, 0), 0.5f, 1, 2, glm::vec3(0.44f, 0.35f, 0.28f), glm::vec3(0.35f, 0.5f, 0.28f));
-    AddMeshToList(tree4);
-
-    Mesh* tree5 = obj3D::CreateTree("tree5", glm::vec3(0, 0, 0), 0.5f, 1, 2, glm::vec3(0.44f, 0.35f, 0.28f), glm::vec3(0.35f, 0.5f, 0.28f));
-    AddMeshToList(tree5);
-
-    Mesh* tree6 = obj3D::CreateTree("tree6", glm::vec3(0, 0, 0), 0.5f, 1, 2, glm::vec3(0.44f, 0.35f, 0.28f), glm::vec3(0.35f, 0.5f, 0.28f));
-    AddMeshToList(tree6);
-
-    Mesh* tree7 = obj3D::CreateTree("tree7", glm::vec3(0, 0, 0), 0.5f, 1, 2, glm::vec3(0.44f, 0.35f, 0.28f), glm::vec3(0.35f, 0.5f, 0.28f));
-    AddMeshToList(tree7);
-
-    Mesh* tree8 = obj3D::CreateTree("tree8", glm::vec3(0, 0, 0), 0.5f, 1, 2, glm::vec3(0.44f, 0.35f, 0.28f), glm::vec3(0.35f, 0.5f, 0.28f));
-    AddMeshToList(tree8);
-
-    Mesh* tree9 = obj3D::CreateTree("tree9", glm::vec3(0, 0, 0), 0.5f, 1, 2, glm::vec3(0.44f, 0.35f, 0.28f), glm::vec3(0.35f, 0.5f, 0.28f));
-    AddMeshToList(tree9);
-
-    Mesh* tree10 = obj3D::CreateTree("tree10", glm::vec3(0, 0, 0), 0.5f, 1, 2, glm::vec3(0.44f, 0.35f, 0.28f), glm::vec3(0.35f, 0.5f, 0.28f));
-    AddMeshToList(tree10);
-
-    Mesh* tree11 = obj3D::CreateTree("tree11", glm::vec3(0, 0, 0), 0.5f, 1, 2, glm::vec3(0.44f, 0.35f, 0.28f), glm::vec3(0.35f, 0.5f, 0.28f));
-    AddMeshToList(tree11);
-
-    Mesh* tree12 = obj3D::CreateTree("tree12", glm::vec3(0, 0, 0), 0.5f, 1, 2, glm::vec3(0.44f, 0.35f, 0.28f), glm::vec3(0.35f, 0.5f, 0.28f));
-    AddMeshToList(tree12);
-
-    Mesh* tree13 = obj3D::CreateTree("tree13", glm::vec3(0, 0, 0), 0.5f, 1, 2, glm::vec3(0.44f, 0.35f, 0.28f), glm::vec3(0.35f, 0.5f, 0.28f));
-    AddMeshToList(tree13);
-
-    Mesh* tree14 = obj3D::CreateTree("tree14", glm::vec3(0, 0, 0), 0.5f, 1, 2, glm::vec3(0.44f, 0.35f, 0.28f), glm::vec3(0.35f, 0.5f, 0.28f));
-    AddMeshToList(tree14);
-
-    Mesh* tree15 = obj3D::CreateTree("tree15", glm::vec3(0, 0, 0), 0.5f, 1, 2, glm::vec3(0.44f, 0.35f, 0.28f), glm::vec3(0.35f, 0.5f, 0.28f));
-    AddMeshToList(tree15);
-
-    Mesh* tree16 = obj3D::CreateTree("tree16", glm::vec3(0, 0, 0), 0.5f, 1, 2, glm::vec3(0.44f, 0.35f, 0.28f), glm::vec3(0.35f, 0.5f, 0.28f));
-    AddMeshToList(tree16);
+    for (int i = 0; i < 80; i++)
+    {
+        Mesh* tree = obj3D::CreateTree(treeNames[i], treeCoordinates[i], 0.5f, 1, 2, glm::vec3(0.44f, 0.35f, 0.28f), glm::vec3(0.35f, 0.5f, 0.28f));
+        AddMeshToList(tree);
+        treeRotationAngles.push_back(rand() % 90);
+    }
 }
 
 
@@ -538,114 +513,11 @@ void Tema2::RenderScene(float deltaTimeSeconds) {
     }
 
     {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(-7.0f, 0, -7.0f);
-        RenderSimpleMesh(meshes["tree1"], shaders["LabShader"], modelMatrix);
-    }
-
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(0, 0, -15.0f);
-        modelMatrix *= transf3D::RotateOY(M_PI / 3.0f);
-        RenderSimpleMesh(meshes["tree2"], shaders["LabShader"], modelMatrix);
-    }
-
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(-15.0f, 0, -25.0f);
-        modelMatrix *= transf3D::RotateOY(M_PI / 2.0f);
-        RenderSimpleMesh(meshes["tree3"], shaders["LabShader"], modelMatrix);
-    }
-
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(-35.0f, 0, -20.0f);
-        modelMatrix *= transf3D::RotateOY(M_PI / 4.0f);
-        RenderSimpleMesh(meshes["tree4"], shaders["LabShader"], modelMatrix);
-    }
-
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(-35.0f, 0, -45.0f);
-        modelMatrix *= transf3D::RotateOY(M_PI / 5.0f);
-        RenderSimpleMesh(meshes["tree5"], shaders["LabShader"], modelMatrix);
-    }
-
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(-15.0f, 0, -45.0f);
-        modelMatrix *= transf3D::RotateOY(M_PI / 2.0f);
-        RenderSimpleMesh(meshes["tree6"], shaders["LabShader"], modelMatrix);
-    }
-
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(10.0f, 0, -35.0f);
-        modelMatrix *= transf3D::RotateOY(M_PI / 2.0f);
-        RenderSimpleMesh(meshes["tree7"], shaders["LabShader"], modelMatrix);
-    }
-
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(-10.0f, 0, -20.0f);
-        modelMatrix *= transf3D::RotateOY(M_PI / 3.0f);
-        RenderSimpleMesh(meshes["tree8"], shaders["LabShader"], modelMatrix);
-    }
-
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(25.0f, 0, -10.0f);
-        modelMatrix *= transf3D::RotateOY(M_PI / 7.0f);
-        RenderSimpleMesh(meshes["tree9"], shaders["LabShader"], modelMatrix);
-    }
-
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(35.0f, 0, -25.0f);
-        modelMatrix *= transf3D::RotateOY(M_PI / 5.0f);
-        RenderSimpleMesh(meshes["tree10"], shaders["LabShader"], modelMatrix);
-    }
-
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(45.0f, 0, 0);
-        modelMatrix *= transf3D::RotateOY(M_PI / 3.0f);
-        RenderSimpleMesh(meshes["tree11"], shaders["LabShader"], modelMatrix);
-    }
-
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(30.0f, 0, 5.0f);
-        modelMatrix *= transf3D::RotateOY(M_PI / 2.0f);
-        RenderSimpleMesh(meshes["tree12"], shaders["LabShader"], modelMatrix);
-    }
-
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(15.0f, 0, 15.0f);
-        modelMatrix *= transf3D::RotateOY(M_PI / 2.0f);
-        RenderSimpleMesh(meshes["tree13"], shaders["LabShader"], modelMatrix);
-    }
-
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(5.0f, 0, 25.0f);
-        modelMatrix *= transf3D::RotateOY(M_PI / 4.0f);
-        RenderSimpleMesh(meshes["tree14"], shaders["LabShader"], modelMatrix);
-    }
-
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(-5.0f, 0, 15.0f);
-        modelMatrix *= transf3D::RotateOY(M_PI / 4.0f);
-        RenderSimpleMesh(meshes["tree15"], shaders["LabShader"], modelMatrix);
-    }
-
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(-5.0f, 0, 0);
-        modelMatrix *= transf3D::RotateOY(M_PI / 2.0f);
-        RenderSimpleMesh(meshes["tree16"], shaders["LabShader"], modelMatrix);
+        for (int i = 0; i < 80; i++)
+        {
+            glm::mat4 modelMatrix = glm::mat4(1);
+            RenderSimpleMesh(meshes[treeNames[i]], shaders["LabShader"], modelMatrix);
+        }
     }
 
     {
@@ -724,8 +596,11 @@ void Tema2::RenderScene2(float deltaTimeSeconds) {
     }
 
     {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        RenderSimpleMesh2(meshes["tree"], shaders["LabShader"], modelMatrix);
+        for (int i = 0; i < 80; i++)
+        {
+            glm::mat4 modelMatrix = glm::mat4(1);
+            RenderSimpleMesh2(meshes[treeNames[i]], shaders["LabShader"], modelMatrix);
+        }
     }
 
     {
@@ -856,7 +731,7 @@ void Tema2::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & model
 
     // TODO(student): Get shader location for uniform mat4 "Model"
     int location1 = glGetUniformLocation(shader->program, "Model");
-    //int location = glGetUniformLocation(shader->program, "Nume1");
+    
     //glUniform1f(location, 3.12312f);
     //glUniform1i(location, 3); // daca vreau sa trimit un int
     //glUniform3f(location, /* 3 float-uri */);
@@ -875,6 +750,8 @@ void Tema2::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & model
 
     projectionMatrix = glm::perspective(RADIANS(fov), window->props.aspectRatio, zNear, zFar);
 
+    int location = glGetUniformLocation(shader->program, "car_position");
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(camera->GetTargetPosition()));
 
     glUniformMatrix4fv(location1, 1, GL_FALSE, glm::value_ptr(modelMatrix));
     glUniformMatrix4fv(location2, 1, GL_FALSE, glm::value_ptr(camera->GetViewMatrix()));

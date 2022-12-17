@@ -10,7 +10,7 @@ layout(location=3) in vec3 color;
 uniform mat4 Model;
 uniform mat4 View;
 uniform mat4 Projection;
-uniform float Nume1;
+uniform vec3 car_position;
 
 // Output
 // TODO(student): Output values to fragment shader
@@ -21,7 +21,11 @@ void main()
     // TODO(student): Send output to fragment shader
     frag_color = normal;
 
+    vec3 pos = position;
+
+//    pos.y = pos.y - pow(length(pos - car_position),2) * 0.01f;
+
     // TODO(student): Compute gl_Position
-    gl_Position = Projection * View * Model * vec4(position, 1);
+    gl_Position = Projection * View * Model * vec4(pos, 1);
 
 }
