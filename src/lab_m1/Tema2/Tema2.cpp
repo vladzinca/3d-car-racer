@@ -141,6 +141,8 @@ void Tema2::Init()
 
     angularStepOY = 0;
 
+
+
     forward = glm::vec3(0, 0, -1);
     rightV = glm::vec3(1, 0, 0);
 
@@ -256,11 +258,60 @@ void Tema2::Init()
     roadPoints.push_back(glm::vec3(38.74f, 0.13f, -2.69f));
     roadPoints.push_back(glm::vec3(36.57f, 0.13f, 1.09f));
 
+    
+    for (int i = 0; i < 39; i++)
+    {
+        glm::vec3 d = glm::normalize(roadPoints[i + 1] - roadPoints[i]);
+        directions.push_back(d);
+    }
+    directions.push_back(glm::normalize(roadPoints[0] - roadPoints[39]));
+
+    for (int i = 0; i < 40; i++)
+        cout << i << " " << directions[i] << "\n";
+
+    //enemy1Distance = 2.5f;
+    //enemy1Distance = ((float)(rand() % 15 + 5)) / 10.0f;
+    //enemy2Distance = ((float)(rand() % 5 + 5)) / 10.0f;
+
+    //cout << enemy1Distance << " " << enemy2Distance << "\n";
+
+    //glm::vec3 up = glm::vec3(0, 1, 0);
+
+    //for (int i = 0; i < 40; i++)
+    //{
+    //    glm::vec3 p = glm::cross(directions[i], up);
+    //    glm::vec3 r = roadPoints[i] + enemy1Distance * p;
+    //    glm::vec3 b = roadPoints[i] - enemy2Distance * p;
+    //    enemy1Points.push_back(r);
+    //    enemy2Points.push_back(b);
+    //}
+    // ultimul punct
+
+
+
+    //for (int i = 0; i < 40; i++)
+        //cout << i << ": " << enemy1Points[i] << "\n";
+
+    flag2 = 0;
+
+    enemy1_forward = glm::vec3(0, 0, -1);
+    enemy1_angularStepOY = 0; // acos(glm::dot(enemy1_forward, directions[10]) / (glm::length(enemy1_forward) * glm::length(directions[10])));
+         
+    enemy1_counter = 11;
+    enemy1_forward = directions[10];
+    enemy1_position = roadPoints[10];
+
+    enemy1_translateX = enemy1_position.x;
+    enemy1_translateZ = enemy1_position.z;
+
     Mesh* road = obj3D::GenerateCompleteRoad("road", roadPoints, roadPointCount, glm::vec3(0.2f, 0.2f, 0.2f));
     AddMeshToList(road);
 
     Mesh* car = obj3D::CreateCuboid("car", position, 0.5f, 0.5f, 1.0f, glm::vec3(0, 1, 1));
     AddMeshToList(car);
+
+    Mesh* enemy1  = obj3D::CreateCuboid("enemy1", glm::vec3(0, 0, 0), 0.5f, 0.5f, 1.0f, glm::vec3(0.73f, 0, 0.96f));
+    AddMeshToList(enemy1);
 
     //Mesh* testCube = obj3D::CreateCube("testCube", glm::vec3(-25, 0.15f, 5), 0.5f, glm::vec3(1, 1, 0));
     //AddMeshToList(testCube);
@@ -419,6 +470,13 @@ void Tema2::RenderScene() {
         modelMatrix *= transf3D::RotateOY(angularStepOY);
         RenderSimpleMesh(meshes["car"], shaders["LabShader"], modelMatrix);
     }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix *= transf3D::Translate(enemy1_translateX, 0, enemy1_translateZ);
+        modelMatrix *= transf3D::RotateOY(enemy1_angularStepOY);
+        RenderSimpleMesh(meshes["enemy1"], shaders["LabShader"], modelMatrix);
+    }
 }
 
 //...............//
@@ -493,6 +551,13 @@ void Tema2::RenderScene2() {
         modelMatrix *= transf3D::RotateOY(angularStepOY);
         RenderSimpleMesh2(meshes["car"], shaders["LabShader2"], modelMatrix);
     }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix *= transf3D::Translate(enemy1_translateX, 0, enemy1_translateZ);
+        modelMatrix *= transf3D::RotateOY(enemy1_angularStepOY);
+        RenderSimpleMesh2(meshes["enemy1"], shaders["LabShader"], modelMatrix);
+    }
 }
 
 
@@ -505,8 +570,42 @@ void Tema2::Update(float deltaTimeSeconds)
     glm::ivec2 resolution = window->GetResolution();
     glViewport(0, 0, resolution.x, resolution.y);
 
-    RenderScene();
+    //if (flag2 == 0)
+    //{
+        //enemy1_angularStepOY += acos(glm::dot(enemy1_forward, directions[10]) / (glm::length(enemy1_forward) * glm::length(directions[10])));
+    //    flag2 = 1;
+    //}
 
+    //float movementSpeed = 10.0f;
+
+    //if (enemy1_counter < 21)
+        //cout << "enemy1_translateX " << enemy1_translateX << " + enemy1Points[enemy1_counter].x " << enemy1Points[enemy1_counter].x << "\n";
+    if ((glm::abs(enemy1_translateX - roadPoints[enemy1_counter].x) < 0.1f) && (glm::abs(enemy1_translateZ - roadPoints[enemy1_counter].z) < 0.1f))
+    {
+        //cout << enemy1_counter + 1 << "\n";
+        enemy1_translateX = roadPoints[enemy1_counter].x;
+        enemy1_translateZ = roadPoints[enemy1_counter].z;
+        enemy1_forward = directions[enemy1_counter];
+        enemy1_angularStepOY = atan2(enemy1_forward.x, enemy1_forward.z) - atan2(0, -1);
+        if (enemy1_angularStepOY < 0)
+        {
+            enemy1_angularStepOY += 2 * M_PI;
+        }
+        if (enemy1_counter == 39)
+            enemy1_counter = 0;
+        else
+            enemy1_counter++;
+    }
+    else
+    {
+        enemy1_translateX += glm::normalize(enemy1_forward).x * deltaTimeSeconds;
+        enemy1_translateZ += glm::normalize(enemy1_forward).z * deltaTimeSeconds;
+        //cout << "x: " << enemy1_position.x + enemy1_translateX << " " << enemy1Points[enemy1_counter].x << "\n";
+        //cout << "z: " << enemy1_position.z + enemy1_translateZ << " " << enemy1Points[enemy1_counter].z << "\n";
+
+    }
+
+    RenderScene();
 
     //DrawCoordinateSystem();
 

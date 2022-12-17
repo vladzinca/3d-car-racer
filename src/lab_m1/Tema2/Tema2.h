@@ -56,10 +56,22 @@ namespace m1
 
         float translateX, translateZ;
         float angularStepOY;
+
+        glm::vec3 enemy1_position;
+        float enemy1_translateX, enemy1_translateZ;
+        float enemy1_angularStepOY;
+
+        glm::vec3 enemy1_forward;
+        int enemy1_counter;
         
         glm::vec3 position;
         glm::vec3 forward;
         glm::vec3 rightV;
+
+        std::vector<glm::vec3> directions;
+        float enemy1Distance, enemy2Distance;
+        std::vector<glm::vec3> enemy1Points;
+        std::vector<glm::vec3> enemy2Points;
 
     protected:
         implement::Camera* camera;
@@ -72,7 +84,7 @@ namespace m1
         ViewportArea miniViewportArea;
         glm::vec3 cameraPosition;
         glm::vec3 miniCameraPosition;
-        int flag;
+        int flag, flag2;
 
         std::vector<glm::vec3> roadPoints;
         int roadPointCount;
