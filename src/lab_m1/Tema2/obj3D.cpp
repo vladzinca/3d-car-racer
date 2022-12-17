@@ -6,6 +6,80 @@
 #include "core/engine.h"
 #include "utils/gl_utils.h"
 
+Mesh* obj3D::CreateTree(
+    const std::string& name,
+    glm::vec3 leftBottomFarTrunkCorner,
+    float trunkSize,
+    float trunkHeight,
+    float treeTopSize,
+    glm::vec3 trunkColor,
+    glm::vec3 leafColor)
+{
+    std::vector<VertexFormat> vertices;
+
+    vertices.push_back(VertexFormat(leftBottomFarTrunkCorner, glm::vec3(1), trunkColor));
+    vertices.push_back(VertexFormat(leftBottomFarTrunkCorner + glm::vec3(trunkSize, 0, 0), glm::vec3(1), trunkColor));
+    vertices.push_back(VertexFormat(leftBottomFarTrunkCorner + glm::vec3(trunkSize, 0, trunkSize), glm::vec3(1), trunkColor));
+    vertices.push_back(VertexFormat(leftBottomFarTrunkCorner + glm::vec3(0, 0, trunkSize), glm::vec3(1), trunkColor));
+
+    vertices.push_back(VertexFormat(leftBottomFarTrunkCorner + glm::vec3(0, trunkHeight, 0), glm::vec3(1), trunkColor));
+    vertices.push_back(VertexFormat(leftBottomFarTrunkCorner + glm::vec3(trunkSize, trunkHeight, 0), glm::vec3(1), trunkColor));
+    vertices.push_back(VertexFormat(leftBottomFarTrunkCorner + glm::vec3(trunkSize, trunkHeight, trunkSize), glm::vec3(1), trunkColor));
+    vertices.push_back(VertexFormat(leftBottomFarTrunkCorner + glm::vec3(0, trunkHeight, trunkSize), glm::vec3(1), trunkColor));
+
+    glm::vec3 leftBottomFarTreeTopCorner = leftBottomFarTrunkCorner + glm::vec3(-((treeTopSize - trunkSize) / 2.0f), trunkHeight, -((treeTopSize - trunkSize) / 2.0f));
+
+    vertices.push_back(VertexFormat(leftBottomFarTreeTopCorner, glm::vec3(1), leafColor));
+    vertices.push_back(VertexFormat(leftBottomFarTreeTopCorner + glm::vec3(treeTopSize, 0, 0), glm::vec3(1), leafColor));
+    vertices.push_back(VertexFormat(leftBottomFarTreeTopCorner + glm::vec3(treeTopSize, 0, treeTopSize), glm::vec3(1), leafColor));
+    vertices.push_back(VertexFormat(leftBottomFarTreeTopCorner + glm::vec3(0, 0, treeTopSize), glm::vec3(1), leafColor));
+
+    vertices.push_back(VertexFormat(leftBottomFarTreeTopCorner + glm::vec3(0, treeTopSize, 0), glm::vec3(1), leafColor));
+    vertices.push_back(VertexFormat(leftBottomFarTreeTopCorner + glm::vec3(treeTopSize, treeTopSize, 0), glm::vec3(1), leafColor));
+    vertices.push_back(VertexFormat(leftBottomFarTreeTopCorner + glm::vec3(treeTopSize, treeTopSize, treeTopSize), glm::vec3(1), leafColor));
+    vertices.push_back(VertexFormat(leftBottomFarTreeTopCorner + glm::vec3(0, treeTopSize, treeTopSize), glm::vec3(1), leafColor));
+
+    Mesh* tree = new Mesh(name);
+    std::vector<unsigned int> indices = { 0, 1, 2,
+                                          3, 0, 2,
+
+                                          3, 2, 6,
+                                          7, 3, 6,
+
+                                          2, 1, 5,
+                                          6, 2, 5,
+
+                                          1, 0, 4,
+                                          5, 1, 4,
+
+                                          0, 3, 7,
+                                          4, 0, 7,
+
+                                          4, 5, 6,
+                                          7, 4, 6,
+
+                                          8, 9, 10,
+                                          11, 8, 10,
+
+                                          11, 10, 14,
+                                          15, 11, 14,
+
+                                          10, 9, 13,
+                                          14, 10, 13,
+
+                                          9, 8, 12,
+                                          13, 9, 12,
+
+                                          8, 11, 15,
+                                          12, 8, 15,
+
+                                          12, 13, 14,
+                                          15, 12, 14 };
+
+    tree->InitFromData(vertices, indices);
+    return tree;
+}
+
 Mesh* obj3D::GenerateCompleteRoad(
     const std::string& name,
     std::vector<glm::vec3> points,

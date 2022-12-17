@@ -71,6 +71,8 @@ namespace m1
         glm::vec3 forward;
         float cx, cz;
 
+        std::vector<glm::vec3> trees;
+
         std::vector<glm::vec3> directions;
         float purpleEnemyDistance, yellowEnemyDistance;
         std::vector<glm::vec3> purpleEnemyPoints;

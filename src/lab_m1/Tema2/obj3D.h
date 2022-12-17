@@ -8,6 +8,8 @@
 
 namespace obj3D
 {
+    Mesh* CreateTree(const std::string& name, glm::vec3 leftBottomFarTrunkCorner, float trunkSize, float trunkHeight, float treeTopSize, glm::vec3 trunkColor, glm::vec3 leafColor);
+
     Mesh* GenerateCompleteRoad(const std::string& name, std::vector<glm::vec3> points, int pointCount, glm::vec3 color);
 
     Mesh* CreateCuboid(const std::string& name, glm::vec3 leftBottomFarCorner, float sizeX, float sizeY, float sizeZ, glm::vec3 color);
