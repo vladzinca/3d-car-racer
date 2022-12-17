@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <cmath> // vezi daca poti scoate
 
 #include "lab_m1/Tema2/obj3D.h"
 #include "lab_m1/Tema2/transf3D.h"
@@ -89,6 +90,13 @@ int Tema2::checkAll(std::vector<glm::vec3> points, int pointCount, glm::vec3 P)
     return 0;
 }
 
+int Tema2::checkCollision(glm::vec3 A, glm::vec3 B, float aRadius, float bRadius)
+{
+    if (sqrt(pow((A.x - B.x), 2) + pow((A.y - B.y), 2) + pow((A.z - B.z), 2)) <= aRadius + bRadius)
+        return 1;
+    return 0;
+}
+
 void Tema2::Init()
 {
     
@@ -151,6 +159,9 @@ void Tema2::Init()
     right = 15.0f;
     bottom = -7.5f;
     up = 7.5f;
+
+    timeFreeze = 0;
+    initialTime = 0;
 
     //projectionMatrix = glm::ortho(left, right, bottom, up, zNear, zFar);
     projectionMatrix = glm::perspective(RADIANS(fov), window->props.aspectRatio, zNear, zFar);
@@ -430,7 +441,7 @@ void Tema2::FrameStart()
     glViewport(0, 0, resolution.x, resolution.y);
 }
 
-void Tema2::RenderScene() {
+void Tema2::RenderScene(float deltaTimeSeconds) {
     {
         glm::mat4 modelMatrix = glm::mat4(1);
         RenderSimpleMesh(meshes["myCube"], shaders["LabShader"], modelMatrix);
@@ -479,27 +490,33 @@ void Tema2::RenderScene() {
     }
 
     {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(purpleEnemy_translateX, 0, purpleEnemy_translateZ);
-        modelMatrix *= transf3D::Translate(cx, 0, cz);
-        modelMatrix *= transf3D::RotateOY(purpleEnemy_angularStepOY);
-        modelMatrix *= transf3D::Translate(-cx, 0, -cz);
-        RenderSimpleMesh(meshes["purpleEnemy"], shaders["LabShader"], modelMatrix);
+        if (initialTime >= 2.5f)
+        {
+            glm::mat4 modelMatrix = glm::mat4(1);
+            modelMatrix *= transf3D::Translate(purpleEnemy_translateX, 0, purpleEnemy_translateZ);
+            modelMatrix *= transf3D::Translate(cx, 0, cz);
+            modelMatrix *= transf3D::RotateOY(purpleEnemy_angularStepOY);
+            modelMatrix *= transf3D::Translate(-cx, 0, -cz);
+            RenderSimpleMesh(meshes["purpleEnemy"], shaders["LabShader"], modelMatrix);
+        }
     }
 
     {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(yellowEnemy_translateX, 0, yellowEnemy_translateZ);
-        modelMatrix *= transf3D::Translate(cx, 0, cz);
-        modelMatrix *= transf3D::RotateOY(yellowEnemy_angularStepOY);
-        modelMatrix *= transf3D::Translate(-cx, 0, -cz);
-        RenderSimpleMesh(meshes["yellowEnemy"], shaders["LabShader"], modelMatrix);
+        if (initialTime >= 2.5f)
+        {
+            glm::mat4 modelMatrix = glm::mat4(1);
+            modelMatrix *= transf3D::Translate(yellowEnemy_translateX, 0, yellowEnemy_translateZ);
+            modelMatrix *= transf3D::Translate(cx, 0, cz);
+            modelMatrix *= transf3D::RotateOY(yellowEnemy_angularStepOY);
+            modelMatrix *= transf3D::Translate(-cx, 0, -cz);
+            RenderSimpleMesh(meshes["yellowEnemy"], shaders["LabShader"], modelMatrix);
+        }
     }
 }
 
 //...............//
 
-void Tema2::RenderScene2() {
+void Tema2::RenderScene2(float deltaTimeSeconds) {
     {
         glm::mat4 modelMatrix = glm::mat4(1);
         RenderSimpleMesh2(meshes["myCube"], shaders["LabShader2"], modelMatrix);
@@ -548,21 +565,27 @@ void Tema2::RenderScene2() {
     }
 
     {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(purpleEnemy_translateX, 0, purpleEnemy_translateZ);
-        modelMatrix *= transf3D::Translate(cx, 0, cz);
-        modelMatrix *= transf3D::RotateOY(purpleEnemy_angularStepOY);
-        modelMatrix *= transf3D::Translate(-cx, 0, -cz);
-        RenderSimpleMesh2(meshes["purpleEnemy"], shaders["LabShader"], modelMatrix);
+        if (initialTime >= 2.5f)
+        {
+            glm::mat4 modelMatrix = glm::mat4(1);
+            modelMatrix *= transf3D::Translate(purpleEnemy_translateX, 0, purpleEnemy_translateZ);
+            modelMatrix *= transf3D::Translate(cx, 0, cz);
+            modelMatrix *= transf3D::RotateOY(purpleEnemy_angularStepOY);
+            modelMatrix *= transf3D::Translate(-cx, 0, -cz);
+            RenderSimpleMesh2(meshes["purpleEnemy"], shaders["LabShader"], modelMatrix);
+        }
     }
 
     {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(yellowEnemy_translateX, 0, yellowEnemy_translateZ);
-        modelMatrix *= transf3D::Translate(cx, 0, cz);
-        modelMatrix *= transf3D::RotateOY(yellowEnemy_angularStepOY);
-        modelMatrix *= transf3D::Translate(-cx, 0, -cz);
-        RenderSimpleMesh2(meshes["yellowEnemy"], shaders["LabShader"], modelMatrix);
+        if (initialTime >= 2.5f)
+        {
+            glm::mat4 modelMatrix = glm::mat4(1);
+            modelMatrix *= transf3D::Translate(yellowEnemy_translateX, 0, yellowEnemy_translateZ);
+            modelMatrix *= transf3D::Translate(cx, 0, cz);
+            modelMatrix *= transf3D::RotateOY(yellowEnemy_angularStepOY);
+            modelMatrix *= transf3D::Translate(-cx, 0, -cz);
+            RenderSimpleMesh2(meshes["yellowEnemy"], shaders["LabShader"], modelMatrix);
+        }
     }
 }
 
@@ -575,56 +598,61 @@ void Tema2::Update(float deltaTimeSeconds)
 
     float enemyMovementSpeed = 5.0f;
 
-    if ((glm::abs(purpleEnemy_translateX + 0.25f - purpleEnemyPoints[purpleEnemy_counter].x) < 0.1f) && (glm::abs(purpleEnemy_translateZ + 0.5f - purpleEnemyPoints[purpleEnemy_counter].z) < 0.1f))
+    initialTime += deltaTimeSeconds;
+
+    if (initialTime >= 2.5f)
     {
-        purpleEnemy_translateX = purpleEnemyPoints[purpleEnemy_counter].x - 0.25f;
-        purpleEnemy_translateZ = purpleEnemyPoints[purpleEnemy_counter].z - 0.5f;
+        if ((glm::abs(purpleEnemy_translateX + 0.25f - purpleEnemyPoints[purpleEnemy_counter].x) < 0.1f) && (glm::abs(purpleEnemy_translateZ + 0.5f - purpleEnemyPoints[purpleEnemy_counter].z) < 0.1f))
+        {
+            purpleEnemy_translateX = purpleEnemyPoints[purpleEnemy_counter].x - 0.25f;
+            purpleEnemy_translateZ = purpleEnemyPoints[purpleEnemy_counter].z - 0.5f;
 
-        purpleEnemy_forward = purpleEnemyDirections[purpleEnemy_counter];
+            purpleEnemy_forward = purpleEnemyDirections[purpleEnemy_counter];
 
-        purpleEnemy_angularStepOY = atan2(purpleEnemy_forward.x, purpleEnemy_forward.z) - atan2(0, -1);
+            purpleEnemy_angularStepOY = atan2(purpleEnemy_forward.x, purpleEnemy_forward.z) - atan2(0, -1);
 
-        if (purpleEnemy_angularStepOY < 0)
-            purpleEnemy_angularStepOY += 2 * M_PI;
+            if (purpleEnemy_angularStepOY < 0)
+                purpleEnemy_angularStepOY += 2 * M_PI;
 
-        if (purpleEnemy_counter == 39)
-            purpleEnemy_counter = 0;
+            if (purpleEnemy_counter == 39)
+                purpleEnemy_counter = 0;
+            else
+                purpleEnemy_counter++;
+        }
         else
-            purpleEnemy_counter++;
-    }
-    else
-    {
-        purpleEnemy_translateX += glm::normalize(purpleEnemy_forward).x * enemyMovementSpeed * deltaTimeSeconds;
-        purpleEnemy_translateZ += glm::normalize(purpleEnemy_forward).z * enemyMovementSpeed * deltaTimeSeconds;
-    }
+        {
+            purpleEnemy_translateX += glm::normalize(purpleEnemy_forward).x * enemyMovementSpeed * deltaTimeSeconds;
+            purpleEnemy_translateZ += glm::normalize(purpleEnemy_forward).z * enemyMovementSpeed * deltaTimeSeconds;
+        }
 
-    if ((glm::abs(yellowEnemy_translateX + 0.25f - yellowEnemyPoints[yellowEnemy_counter].x) < 0.1f) && (glm::abs(yellowEnemy_translateZ + 0.5f - yellowEnemyPoints[yellowEnemy_counter].z) < 0.1f))
-    {
-        yellowEnemy_translateX = yellowEnemyPoints[yellowEnemy_counter].x - 0.25f;
-        yellowEnemy_translateZ = yellowEnemyPoints[yellowEnemy_counter].z - 0.5f;
+        if ((glm::abs(yellowEnemy_translateX + 0.25f - yellowEnemyPoints[yellowEnemy_counter].x) < 0.1f) && (glm::abs(yellowEnemy_translateZ + 0.5f - yellowEnemyPoints[yellowEnemy_counter].z) < 0.1f))
+        {
+            yellowEnemy_translateX = yellowEnemyPoints[yellowEnemy_counter].x - 0.25f;
+            yellowEnemy_translateZ = yellowEnemyPoints[yellowEnemy_counter].z - 0.5f;
 
-        if (yellowEnemy_counter == 0)
-            yellowEnemy_forward = -yellowEnemyDirections[39];
+            if (yellowEnemy_counter == 0)
+                yellowEnemy_forward = -yellowEnemyDirections[39];
+            else
+                yellowEnemy_forward = -yellowEnemyDirections[yellowEnemy_counter - 1];
+
+            yellowEnemy_angularStepOY = atan2(yellowEnemy_forward.x, yellowEnemy_forward.z) - atan2(0, -1);
+
+            if (yellowEnemy_angularStepOY < 0)
+                yellowEnemy_angularStepOY += 2 * M_PI;
+
+            if (yellowEnemy_counter == 0)
+                yellowEnemy_counter = 39;
+            else
+                yellowEnemy_counter--;
+        }
         else
-            yellowEnemy_forward = -yellowEnemyDirections[yellowEnemy_counter - 1];
-
-        yellowEnemy_angularStepOY = atan2(yellowEnemy_forward.x, yellowEnemy_forward.z) - atan2(0, -1);
-
-        if (yellowEnemy_angularStepOY < 0)
-            yellowEnemy_angularStepOY += 2 * M_PI;
-
-        if (yellowEnemy_counter == 0)
-            yellowEnemy_counter = 39;
-        else
-            yellowEnemy_counter--;
-    }
-    else
-    {
-        yellowEnemy_translateX += glm::normalize(yellowEnemy_forward).x * enemyMovementSpeed * deltaTimeSeconds;
-        yellowEnemy_translateZ += glm::normalize(yellowEnemy_forward).z * enemyMovementSpeed * deltaTimeSeconds;
+        {
+            yellowEnemy_translateX += glm::normalize(yellowEnemy_forward).x * enemyMovementSpeed * deltaTimeSeconds;
+            yellowEnemy_translateZ += glm::normalize(yellowEnemy_forward).z * enemyMovementSpeed * deltaTimeSeconds;
+        }
     }
 
-    RenderScene();
+    RenderScene(deltaTimeSeconds);
 
     //DrawCoordinateSystem();
 
@@ -640,7 +668,7 @@ void Tema2::Update(float deltaTimeSeconds)
     glViewport(miniViewportArea.x, miniViewportArea.y, miniViewportArea.width, miniViewportArea.height);
 
     // TODO(student): render the scene again, in the new viewport
-    RenderScene2();
+    RenderScene2(deltaTimeSeconds);
 
     // camera->RotateThirdPerson_OX(120);
     //projectionMatrix = glm::perspective(RADIANS(fov), window->props.aspectRatio, zNear, zFar);
@@ -757,44 +785,53 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
     float movementSpeed = 7.5f;
     float rotationSpeed = 1.0f;
 
-    if (window->KeyHold(GLFW_KEY_S) && checkAll(roadPoints, roadPointCount, glm::vec3(translateX - glm::normalize(forward).x * movementSpeed * deltaTime, 0.13f, translateZ - glm::normalize(forward).z * movementSpeed * deltaTime)))
-    { 
-        translateX -= glm::normalize(forward).x * movementSpeed * deltaTime;
-        translateZ -= glm::normalize(forward).z * movementSpeed * deltaTime;
-        camera->MoveForward(-movementSpeed * deltaTime);
-        
-        miniCamera->position = glm::vec3(translateX, 15, translateZ);
-    }
-    if (window->KeyHold(GLFW_KEY_W) && checkAll(roadPoints, roadPointCount, glm::vec3(translateX + glm::normalize(forward).x * movementSpeed * deltaTime, 0.13f, translateZ + glm::normalize(forward).z * movementSpeed * deltaTime)))
-    {
-        translateX += glm::normalize(forward).x * movementSpeed * deltaTime;
-        translateZ += glm::normalize(forward).z * movementSpeed * deltaTime;
-        camera->MoveForward(movementSpeed * deltaTime); // nu merge bn nici S
-        
-        //miniCamera->MoveForward(movementSpeed * deltaTime); // nu merge bn nici S
-        miniCamera->position = glm::vec3(translateX, 15, translateZ);
-    }
-    if (window->KeyHold(GLFW_KEY_A))
-    {
-        angularStepOY += rotationSpeed * deltaTime;
-        forward = glm::normalize(glm::rotate(glm::mat4(1.0f), rotationSpeed * deltaTime, glm::vec3(0, 1, 0)) * glm::vec4(forward, 1));
-        camera->RotateThirdPerson_OY(rotationSpeed * deltaTime);
-    }
+    timeFreeze += deltaTime;
 
-        
-    if (window->KeyHold(GLFW_KEY_D))
+    if (checkCollision(glm::vec3(translateX, 0.4f, translateZ), glm::vec3(purpleEnemy_translateX + 0.25f, 0.4f, purpleEnemy_translateZ + 0.5f), 0.5f, 0.5f) ||
+        checkCollision(glm::vec3(translateX, 0.4f, translateZ), glm::vec3(yellowEnemy_translateX + 0.25f, 0.4f, yellowEnemy_translateZ + 0.5f), 0.5f, 0.5f))
+        timeFreeze = 0;
+
+    if (timeFreeze >= 0.0625f)
     {
-        angularStepOY -= rotationSpeed * deltaTime;
-        forward = glm::normalize(glm::rotate(glm::mat4(1.0f), -rotationSpeed * deltaTime, glm::vec3(0, 1, 0)) * glm::vec4(forward, 1));
-        //rightV = glm::normalize(glm::rotate(glm::mat4(1.0f), -rotationSpeed * deltaTime, glm::vec3(0, 1, 0)) * glm::vec4(rightV, 1));
-        camera->RotateThirdPerson_OY(-rotationSpeed * deltaTime);
-        //miniCamera->forward = glm::normalize(forward);
-        //cout << "forward: " << forward << "\n";
-        //cout << "camera->forward: " << camera->forward << "\n";
-        //cout << "miniCamera->forward: " << miniCamera->forward << "\n";
-        //miniCamera->forward = forward;
-        //miniCamera->right = rightV;
-        //cout << camera->forward << "\n";
+        if (window->KeyHold(GLFW_KEY_S) && checkAll(roadPoints, roadPointCount, glm::vec3(translateX - glm::normalize(forward).x * movementSpeed * deltaTime, 0.13f, translateZ - glm::normalize(forward).z * movementSpeed * deltaTime)))
+        {
+            translateX -= glm::normalize(forward).x * movementSpeed * deltaTime;
+            translateZ -= glm::normalize(forward).z * movementSpeed * deltaTime;
+            camera->MoveForward(-movementSpeed * deltaTime);
+
+            miniCamera->position = glm::vec3(translateX, 15, translateZ);
+        }
+        if (window->KeyHold(GLFW_KEY_W) && checkAll(roadPoints, roadPointCount, glm::vec3(translateX + glm::normalize(forward).x * movementSpeed * deltaTime, 0.13f, translateZ + glm::normalize(forward).z * movementSpeed * deltaTime)))
+        {
+            translateX += glm::normalize(forward).x * movementSpeed * deltaTime;
+                translateZ += glm::normalize(forward).z * movementSpeed * deltaTime;
+                camera->MoveForward(movementSpeed* deltaTime); // nu merge bn nici S
+
+                //miniCamera->MoveForward(movementSpeed * deltaTime); // nu merge bn nici S
+                miniCamera->position = glm::vec3(translateX, 15, translateZ);
+        }
+        if (window->KeyHold(GLFW_KEY_A))
+        {
+            angularStepOY += rotationSpeed * deltaTime;
+            forward = glm::normalize(glm::rotate(glm::mat4(1.0f), rotationSpeed * deltaTime, glm::vec3(0, 1, 0)) * glm::vec4(forward, 1));
+            camera->RotateThirdPerson_OY(rotationSpeed * deltaTime);
+        }
+
+
+        if (window->KeyHold(GLFW_KEY_D))
+        {
+            angularStepOY -= rotationSpeed * deltaTime;
+            forward = glm::normalize(glm::rotate(glm::mat4(1.0f), -rotationSpeed * deltaTime, glm::vec3(0, 1, 0)) * glm::vec4(forward, 1));
+            //rightV = glm::normalize(glm::rotate(glm::mat4(1.0f), -rotationSpeed * deltaTime, glm::vec3(0, 1, 0)) * glm::vec4(rightV, 1));
+            camera->RotateThirdPerson_OY(-rotationSpeed * deltaTime);
+            //miniCamera->forward = glm::normalize(forward);
+            //cout << "forward: " << forward << "\n";
+            //cout << "camera->forward: " << camera->forward << "\n";
+            //cout << "miniCamera->forward: " << miniCamera->forward << "\n";
+            //miniCamera->forward = forward;
+            //miniCamera->right = rightV;
+            //cout << camera->forward << "\n";
+        }
     }
 }
 

@@ -46,13 +46,16 @@ namespace m1
         void OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY) override;
         void OnWindowResize(int width, int height) override;
 
-        void RenderScene();
+        void RenderScene(float deltaTimeSeconds);
 
-        void RenderScene2();
+        void RenderScene2(float deltaTimeSeconds);
 
         float computeArea(glm::vec3 A, glm::vec3 B, glm::vec3 C);
         int checkPoint(glm::vec3 A, glm::vec3 B, glm::vec3 C, glm::vec3 P);
         int checkAll(std::vector<glm::vec3> points, int pointCount, glm::vec3 P);
+        int checkCollision(glm::vec3 A, glm::vec3 B, float aRadius, float bRadius);
+
+        float timeFreeze, initialTime;
 
         float translateX, translateZ;
         float angularStepOY;
