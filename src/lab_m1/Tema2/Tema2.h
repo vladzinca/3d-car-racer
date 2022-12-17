@@ -67,6 +67,7 @@ namespace m1
         glm::vec3 position;
         glm::vec3 forward;
         glm::vec3 rightV;
+        float cx, cz;
 
         std::vector<glm::vec3> directions;
         float enemy1Distance, enemy2Distance;

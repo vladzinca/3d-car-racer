@@ -301,8 +301,11 @@ void Tema2::Init()
     enemy1_forward = directions[10];
     enemy1_position = roadPoints[10];
 
-    enemy1_translateX = enemy1_position.x;
-    enemy1_translateZ = enemy1_position.z;
+    cx = 0.25f;
+    cz = 0.5f;
+
+    enemy1_translateX = enemy1_position.x - 0.25f;
+    enemy1_translateZ = enemy1_position.z - 0.5f;
 
     Mesh* road = obj3D::GenerateCompleteRoad("road", roadPoints, roadPointCount, glm::vec3(0.2f, 0.2f, 0.2f));
     AddMeshToList(road);
@@ -310,7 +313,7 @@ void Tema2::Init()
     Mesh* car = obj3D::CreateCuboid("car", position, 0.5f, 0.5f, 1.0f, glm::vec3(0, 1, 1));
     AddMeshToList(car);
 
-    Mesh* enemy1  = obj3D::CreateCuboid("enemy1", glm::vec3(0, 0, 0), 0.5f, 0.5f, 1.0f, glm::vec3(0.73f, 0, 0.96f));
+    Mesh* enemy1  = obj3D::CreateCuboid("enemy1", glm::vec3(0, 0.15f, 0), 0.5f, 0.5f, 1.0f, glm::vec3(0.73f, 0, 0.96f));
     AddMeshToList(enemy1);
 
     //Mesh* testCube = obj3D::CreateCube("testCube", glm::vec3(-25, 0.15f, 5), 0.5f, glm::vec3(1, 1, 0));
@@ -474,7 +477,9 @@ void Tema2::RenderScene() {
     {
         glm::mat4 modelMatrix = glm::mat4(1);
         modelMatrix *= transf3D::Translate(enemy1_translateX, 0, enemy1_translateZ);
+        modelMatrix *= transf3D::Translate(cx, 0, cz);
         modelMatrix *= transf3D::RotateOY(enemy1_angularStepOY);
+        modelMatrix *= transf3D::Translate(-cx, 0, -cz);
         RenderSimpleMesh(meshes["enemy1"], shaders["LabShader"], modelMatrix);
     }
 }
@@ -570,21 +575,21 @@ void Tema2::Update(float deltaTimeSeconds)
     glm::ivec2 resolution = window->GetResolution();
     glViewport(0, 0, resolution.x, resolution.y);
 
-    //if (flag2 == 0)
-    //{
-        //enemy1_angularStepOY += acos(glm::dot(enemy1_forward, directions[10]) / (glm::length(enemy1_forward) * glm::length(directions[10])));
-    //    flag2 = 1;
-    //}
+    if (flag2 == 0)
+    {
+        enemy1_angularStepOY = atan2(enemy1_forward.x, enemy1_forward.z) - atan2(0, -1);
+        flag2 = 1;
+    }
 
     //float movementSpeed = 10.0f;
 
     //if (enemy1_counter < 21)
         //cout << "enemy1_translateX " << enemy1_translateX << " + enemy1Points[enemy1_counter].x " << enemy1Points[enemy1_counter].x << "\n";
-    if ((glm::abs(enemy1_translateX - roadPoints[enemy1_counter].x) < 0.1f) && (glm::abs(enemy1_translateZ - roadPoints[enemy1_counter].z) < 0.1f))
+    if ((glm::abs(enemy1_translateX + 0.25f - roadPoints[enemy1_counter].x) < 0.1f) && (glm::abs(enemy1_translateZ + 0.5f - roadPoints[enemy1_counter].z) < 0.1f))
     {
         //cout << enemy1_counter + 1 << "\n";
-        enemy1_translateX = roadPoints[enemy1_counter].x;
-        enemy1_translateZ = roadPoints[enemy1_counter].z;
+        enemy1_translateX = roadPoints[enemy1_counter].x - 0.25f;
+        enemy1_translateZ = roadPoints[enemy1_counter].z - 0.5f;
         enemy1_forward = directions[enemy1_counter];
         enemy1_angularStepOY = atan2(enemy1_forward.x, enemy1_forward.z) - atan2(0, -1);
         if (enemy1_angularStepOY < 0)
@@ -604,6 +609,9 @@ void Tema2::Update(float deltaTimeSeconds)
         //cout << "z: " << enemy1_position.z + enemy1_translateZ << " " << enemy1Points[enemy1_counter].z << "\n";
 
     }
+
+    //enemy1_translateX = cx + 0.25f;
+    //enemy1_translateZ = cz + 0.5f;
 
     RenderScene();
 

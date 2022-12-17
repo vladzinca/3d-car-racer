@@ -16,6 +16,7 @@ Mesh* obj3D::GenerateCompleteRoad(
 
     float redDistance = 2.5f;
     float blueDistance = 1.5f;
+    //float blueDistance = 2.5f;
     std::cout << "Urmeaza pista:\n";
 
     for (int i = 0; i < pointCount - 1; i++)
