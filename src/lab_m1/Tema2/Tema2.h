@@ -49,8 +49,8 @@ namespace m1
         void OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY) override;
         void OnWindowResize(int width, int height) override;
 
-        void RenderScene(float deltaTimeSeconds);
-        void RenderSceneMini(float deltaTimeSeconds);
+        void RenderScene();
+        void RenderSceneMini();
 
     protected:
         implement::Camera* camera;
@@ -85,8 +85,6 @@ namespace m1
         int yellowEnemy_counter;
         glm::vec3 yellowEnemy_position, yellowEnemy_forward;
         float yellowEnemy_translateX, yellowEnemy_translateZ, yellowEnemy_angularStepOY;
-
-
 
     };
 }

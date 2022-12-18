@@ -207,84 +207,50 @@ void Tema2::Init()
         AddMeshToList(tree);
     }
 
-    Mesh* car = obj3D::CreateCuboid("car", position, carWidth, carHeight, carLength, glm::vec3(0, 1, 1));
+    Mesh* car = obj3D::CreateCar("car", position, carWidth, carHeight, carLength, glm::vec3(0, 1, 1));
     AddMeshToList(car);
 
-    Mesh* purpleEnemy = obj3D::CreateCuboid("purpleEnemy", glm::vec3(0, 0.15f, 0), carWidth, carHeight, carLength, glm::vec3(0.73f, 0, 0.96f));
+    Mesh* purpleEnemy = obj3D::CreateCar("purpleEnemy", glm::vec3(0, 0.15f, 0), carWidth, carHeight, carLength, glm::vec3(0.73f, 0, 0.96f));
     AddMeshToList(purpleEnemy);
 
-    Mesh* yellowEnemy = obj3D::CreateCuboid("yellowEnemy", glm::vec3(0, 0.15f, 0), carWidth, carHeight, carLength, glm::vec3(0.94f, 0.94f, 0));
+    Mesh* yellowEnemy = obj3D::CreateCar("yellowEnemy", glm::vec3(0, 0.15f, 0), carWidth, carHeight, carLength, glm::vec3(0.94f, 0.94f, 0));
     AddMeshToList(yellowEnemy);
 }
 
 Mesh* Tema2::CreateMesh(const char *name, const std::vector<VertexFormat> &vertices, const std::vector<unsigned int> &indices)
 {
     unsigned int VAO = 0;
-    // Create the VAO and bind it
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
-    // Create the VBO and bind it
     unsigned int VBO;
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    // Send vertices data into the VBO buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
-    // Create the IBO and bind it
     unsigned int IBO;
     glGenBuffers(1, &IBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 
-    // Send indices data into the IBO buffer
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), &indices[0], GL_STATIC_DRAW);
 
-    // ========================================================================
-    // This section demonstrates how the GPU vertex shader program
-    // receives data.
-
-    // TODO(student): If you look closely in the `Init()` and `Update()`
-    // functions, you will see that we have three objects which we load
-    // and use in three different ways:
-    // - LoadMesh   + LabShader (this lab's shader)
-    // - CreateMesh + VertexNormal (this shader is already implemented)
-    // - CreateMesh + LabShader (this lab's shader)
-    // To get an idea about how they're different from one another, do the
-    // following experiments. What happens if you switch the color pipe and
-    // normal pipe in this function (but not in the shader)? Now, what happens
-    // if you do the same thing in the shader (but not in this function)?
-    // Finally, what happens if you do the same thing in both places? Why?
-
-    // Set vertex position attribute
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), 0);
 
-    // Set vertex normal attribute
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(sizeof(glm::vec3))); // citeste dupa 3 float-uri, 3 * 8 = 24 bytes
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(sizeof(glm::vec3)));
 
-    // Set texture coordinate attribute
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3))); // citeste dupa 6 float-uri
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3)));
 
-    //// Set vertex color attribute
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3) + sizeof(glm::vec2))); // citeste dupa 8 float-uri
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3) + sizeof(glm::vec2)));
 
-    // Set vertex car position attribute
-    //glEnableVertexAttribArray(4);
-    //glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(3 * sizeof(glm::vec3) + sizeof(glm::vec2))); // citeste dupa 3 float-uri, 3 * 8 = 24 bytes
-
-    // ========================================================================
-
-    // Unbind the VAO
     glBindVertexArray(0);
 
-    // Check for OpenGL errors
     CheckOpenGLError();
 
-    // Mesh information is saved into a Mesh object
     meshes[name] = new Mesh(name);
     meshes[name]->InitFromBuffer(VAO, static_cast<unsigned int>(indices.size()));
     meshes[name]->vertices = vertices;
@@ -292,19 +258,16 @@ Mesh* Tema2::CreateMesh(const char *name, const std::vector<VertexFormat> &verti
     return meshes[name];
 }
 
-
 void Tema2::FrameStart()
 {
-    // Clears the color buffer (using the previously set color) and depth buffer
     glClearColor(0.5f, 0.8f, 0.9f, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::ivec2 resolution = window->GetResolution();
-    // Sets the screen area where to draw
     glViewport(0, 0, resolution.x, resolution.y);
 }
 
-void Tema2::RenderScene(float deltaTimeSeconds) {
+void Tema2::RenderScene() {
     {
         glm::mat4 modelMatrix = glm::mat4(1);
         RenderSimpleMesh(meshes["green_plane"], shaders["HWShader"], modelMatrix);
@@ -316,18 +279,18 @@ void Tema2::RenderScene(float deltaTimeSeconds) {
     }
 
     {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(translateX, 0, translateZ);
-        modelMatrix *= transf3D::RotateOY(angularStepOY);
-        RenderSimpleMesh(meshes["car"], shaders["HWShader"], modelMatrix);
-    }
-
-    {
         for (int i = 0; i < 80; i++)
         {
             glm::mat4 modelMatrix = glm::mat4(1);
             RenderSimpleMesh(meshes["tree" + std::to_string(i)], shaders["HWShader"], modelMatrix);
         }
+    }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix *= transf3D::Translate(translateX, 0, translateZ);
+        modelMatrix *= transf3D::RotateOY(angularStepOY);
+        RenderSimpleMesh(meshes["car"], shaders["HWShader"], modelMatrix);
     }
 
     {
@@ -355,9 +318,7 @@ void Tema2::RenderScene(float deltaTimeSeconds) {
     }
 }
 
-//...............//
-
-void Tema2::RenderSceneMini(float deltaTimeSeconds) {
+void Tema2::RenderSceneMini() {
     {
         glm::mat4 modelMatrix = glm::mat4(1);
         RenderSimpleMeshMini(meshes["green_plane"], shaders["MiniHWShader"], modelMatrix);
@@ -369,18 +330,18 @@ void Tema2::RenderSceneMini(float deltaTimeSeconds) {
     }
 
     {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix *= transf3D::Translate(translateX, 0, translateZ);
-        modelMatrix *= transf3D::RotateOY(angularStepOY);
-        RenderSimpleMeshMini(meshes["car"], shaders["MiniHWShader"], modelMatrix);
-    }
-
-    {
         for (int i = 0; i < 80; i++)
         {
             glm::mat4 modelMatrix = glm::mat4(1);
             RenderSimpleMeshMini(meshes["tree" + std::to_string(i)], shaders["MiniHWShader"], modelMatrix);
         }
+    }
+
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix *= transf3D::Translate(translateX, 0, translateZ);
+        modelMatrix *= transf3D::RotateOY(angularStepOY);
+        RenderSimpleMeshMini(meshes["car"], shaders["MiniHWShader"], modelMatrix);
     }
 
     {
@@ -408,32 +369,29 @@ void Tema2::RenderSceneMini(float deltaTimeSeconds) {
     }
 }
 
-
-
 void Tema2::Update(float deltaTimeSeconds)
 {
     glm::ivec2 resolution = window->GetResolution();
     glViewport(0, 0, resolution.x, resolution.y);
 
     float enemyMovementSpeed = 5.0f;
-
     initialTime += deltaTimeSeconds;
 
     if (initialTime >= 10.0f)
     {
-        if ((glm::abs(purpleEnemy_translateX + 0.25f - purpleEnemyPoints[purpleEnemy_counter].x) < 0.1f) && (glm::abs(purpleEnemy_translateZ + 0.5f - purpleEnemyPoints[purpleEnemy_counter].z) < 0.1f))
+        if ((glm::abs(purpleEnemy_translateX + cx - purpleEnemyPoints[purpleEnemy_counter].x) < 0.1f) &&
+            (glm::abs(purpleEnemy_translateZ + cz - purpleEnemyPoints[purpleEnemy_counter].z) < 0.1f))
         {
-            purpleEnemy_translateX = purpleEnemyPoints[purpleEnemy_counter].x - 0.25f;
-            purpleEnemy_translateZ = purpleEnemyPoints[purpleEnemy_counter].z - 0.5f;
+            purpleEnemy_translateX = purpleEnemyPoints[purpleEnemy_counter].x - cx;
+            purpleEnemy_translateZ = purpleEnemyPoints[purpleEnemy_counter].z - cz;
 
             purpleEnemy_forward = purpleEnemyDirections[purpleEnemy_counter];
 
             purpleEnemy_angularStepOY = (float)(atan2(purpleEnemy_forward.x, purpleEnemy_forward.z) - atan2(0, -1));
-
             if (purpleEnemy_angularStepOY < 0)
                 purpleEnemy_angularStepOY += (float)(2 * M_PI);
 
-            if (purpleEnemy_counter == 39)
+            if (purpleEnemy_counter == roadPointCount - 1)
                 purpleEnemy_counter = 0;
             else
                 purpleEnemy_counter++;
@@ -444,27 +402,29 @@ void Tema2::Update(float deltaTimeSeconds)
             purpleEnemy_translateZ += glm::normalize(purpleEnemy_forward).z * enemyMovementSpeed * deltaTimeSeconds;
         }
 
-        if ((glm::abs(yellowEnemy_translateX + 0.25f - yellowEnemyPoints[yellowEnemy_counter].x) < 0.1f) && (glm::abs(yellowEnemy_translateZ + 0.5f - yellowEnemyPoints[yellowEnemy_counter].z) < 0.1f))
+        if ((glm::abs(yellowEnemy_translateX + cx - yellowEnemyPoints[yellowEnemy_counter].x) < 0.1f) &&
+            (glm::abs(yellowEnemy_translateZ + cz - yellowEnemyPoints[yellowEnemy_counter].z) < 0.1f))
         {
-            yellowEnemy_translateX = yellowEnemyPoints[yellowEnemy_counter].x - 0.25f;
-            yellowEnemy_translateZ = yellowEnemyPoints[yellowEnemy_counter].z - 0.5f;
+            yellowEnemy_translateX = yellowEnemyPoints[yellowEnemy_counter].x - cx;
+            yellowEnemy_translateZ = yellowEnemyPoints[yellowEnemy_counter].z - cz;
 
             if (yellowEnemy_counter == 0)
-                yellowEnemy_forward = -yellowEnemyDirections[39];
+            {
+                tmp = roadPointCount - 1;
+                yellowEnemy_forward = -yellowEnemyDirections[tmp];
+            }
             else
             {
                 tmp = yellowEnemy_counter - 1;
                 yellowEnemy_forward = -yellowEnemyDirections[tmp];
             }
-                
 
             yellowEnemy_angularStepOY = (float)(atan2(yellowEnemy_forward.x, yellowEnemy_forward.z) - atan2(0, -1));
-
             if (yellowEnemy_angularStepOY < 0)
                 yellowEnemy_angularStepOY += (float)(2 * M_PI);
 
             if (yellowEnemy_counter == 0)
-                yellowEnemy_counter = 39;
+                yellowEnemy_counter = roadPointCount - 1;
             else
                 yellowEnemy_counter--;
         }
@@ -475,33 +435,17 @@ void Tema2::Update(float deltaTimeSeconds)
         }
     }
 
-    RenderScene(deltaTimeSeconds);
-
-    //DrawCoordinateSystem();
-
-    //projectionMatrix = glm::ortho(left, right, bottom, up, zNear, zFar);
-    //camera->Set(glm::vec3(0, 5, 0.1f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
-
-  
-    //camera->position = glm::vec3(transf3D::Translate(0, 10, 6) * glm::vec4(camera->position, 1));
-    //camera->RotateThirdPerson_OX(-120);
-    //projectionMatrix = glm::ortho(left, right, bottom, up, zNear, zFar);
+    RenderScene();
 
     glClear(GL_DEPTH_BUFFER_BIT);
     glViewport(miniViewportArea.x, miniViewportArea.y, miniViewportArea.width, miniViewportArea.height);
 
-    // TODO(student): render the scene again, in the new viewport
-    RenderSceneMini(deltaTimeSeconds);
-
-    // camera->RotateThirdPerson_OX(120);
-    //projectionMatrix = glm::perspective(RADIANS(fov), window->props.aspectRatio, zNear, zFar);
-    //DrawCoordinateSystem();
+    RenderSceneMini();
 }
 
 
 void Tema2::FrameEnd()
 {
-    //DrawCoordinateSystem(camera->GetViewMatrix(), projectionMatrix);
 }
 
 
@@ -510,46 +454,20 @@ void Tema2::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & model
     if (!mesh || !shader || !shader->GetProgramID())
         return;
 
-    // Render an object using the specified shader and the specified position
     glUseProgram(shader->program);
 
-    // TODO(student): Get shader location for uniform mat4 "Model"
     int location1 = glGetUniformLocation(shader->program, "Model");
-    
-    //glUniform1f(location, 3.12312f);
-    //glUniform1i(location, 3); // daca vreau sa trimit un int
-    //glUniform3f(location, /* 3 float-uri */);
-
-    // TODO(student): Set shader uniform "Model" to modelMatrix
-
-    // TODO(student): Get shader location for uniform mat4 "View"
     int location2 = glGetUniformLocation(shader->program, "View");
-
-    // TODO(student): Set shader uniform "View" to viewMatrix
-    //glm::mat4 viewMatrix = camera->GetViewMatrix();
-    //glm::mat4 viewMatrix = GetSceneCamera()->GetViewMatrix();
-
-    // TODO(student): Get shader location for uniform mat4 "Projection"
     int location3 = glGetUniformLocation(shader->program, "Projection");
-
 
     projectionMatrix = glm::perspective(RADIANS(fov), window->props.aspectRatio, zNear, zFar);
 
     glUniformMatrix4fv(location1, 1, GL_FALSE, glm::value_ptr(modelMatrix));
     glUniformMatrix4fv(location2, 1, GL_FALSE, glm::value_ptr(camera->GetViewMatrix()));
     glUniformMatrix4fv(location3, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-    //glUniformMatrix4fv(location4, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    //glUniformMatrix4fv(location5, 1, GL_FALSE, glm::value_ptr(miniCamera->GetViewMatrix()));
-    //glUniformMatrix4fv(location6, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
-    // Draw the object
     glBindVertexArray(mesh->GetBuffers()->m_VAO);
     glDrawElements(mesh->GetDrawMode(), static_cast<int>(mesh->indices.size()), GL_UNSIGNED_INT, 0);
-
-
-    //..................................................//
-
-    
 }
 
 void Tema2::RenderSimpleMeshMini(Mesh* mesh, Shader* miniShader, const glm::mat4& modelMatrix)
@@ -559,79 +477,58 @@ void Tema2::RenderSimpleMeshMini(Mesh* mesh, Shader* miniShader, const glm::mat4
 
     glUseProgram(miniShader->program);
 
-    // TODO(student): Get shader location for uniform mat4 "Model"
-    int location5 = glGetUniformLocation(miniShader->program, "Model");
-    //int location = glGetUniformLocation(shader->program, "Nume1");
-    //glUniform1f(location, 3.12312f);
-    //glUniform1i(location, 3); // daca vreau sa trimit un int
-    //glUniform3f(location, /* 3 float-uri */);
-
-    // TODO(student): Set shader uniform "Model" to modelMatrix
-
-    // TODO(student): Get shader location for uniform mat4 "View"
-    int location6 = glGetUniformLocation(miniShader->program, "View");
-
-    // TODO(student): Set shader uniform "View" to viewMatrix
-    //glm::mat4 viewMatrix = camera->GetViewMatrix();
-    //glm::mat4 viewMatrix = GetSceneCamera()->GetViewMatrix();
-
-    // TODO(student): Get shader location for uniform mat4 "Projection"
-    int location7 = glGetUniformLocation(miniShader->program, "Projection");
+    int location1 = glGetUniformLocation(miniShader->program, "Model");
+    int location2 = glGetUniformLocation(miniShader->program, "View");
+    int location3 = glGetUniformLocation(miniShader->program, "Projection");
 
     projectionMatrix = glm::ortho(left, right, bottom, up, zNear, zFar);
 
+    glUniformMatrix4fv(location1, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    glUniformMatrix4fv(location2, 1, GL_FALSE, glm::value_ptr(miniCamera->GetViewMatrix()));
+    glUniformMatrix4fv(location3, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
-    glUniformMatrix4fv(location5, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    glUniformMatrix4fv(location6, 1, GL_FALSE, glm::value_ptr(miniCamera->GetViewMatrix()));
-    glUniformMatrix4fv(location7, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-
-    //glUniformMatrix4fv(location4, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    //glUniformMatrix4fv(location5, 1, GL_FALSE, glm::value_ptr(miniCamera->GetViewMatrix()));
-    //glUniformMatrix4fv(location6, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-
-    // Draw the object
     glBindVertexArray(mesh->GetBuffers()->m_VAO);
     glDrawElements(mesh->GetDrawMode(), static_cast<int>(mesh->indices.size()), GL_UNSIGNED_INT, 0);
 }
 
-
-/*
- *  These are callback functions. To find more about callbacks and
- *  how they behave, see `input_controller.h`.
- */
-
-
 void Tema2::OnInputUpdate(float deltaTime, int mods)
 {
-    // Add key press event
     float movementSpeed = 7.5f;
     float rotationSpeed = 1.0f;
-
     timeFreeze += deltaTime;
 
-    if (obj3D::checkCollision(glm::vec3(translateX, 0.4f, translateZ), glm::vec3(purpleEnemy_translateX + 0.25f, 0.4f, purpleEnemy_translateZ + 0.5f), 0.5f, 0.5f) ||
-        obj3D::checkCollision(glm::vec3(translateX, 0.4f, translateZ), glm::vec3(yellowEnemy_translateX + 0.25f, 0.4f, yellowEnemy_translateZ + 0.5f), 0.5f, 0.5f))
+    if (obj3D::CheckCarCollision(glm::vec3(translateX, 0.4f, translateZ),
+                              glm::vec3(purpleEnemy_translateX + cx, 0.4f, purpleEnemy_translateZ + cz), cz, cz) ||
+        obj3D::CheckCarCollision(glm::vec3(translateX, 0.4f, translateZ),
+                              glm::vec3(yellowEnemy_translateX + cx, 0.4f, yellowEnemy_translateZ + cz), cz, cz))
         timeFreeze = 0;
 
     if (timeFreeze >= 0.0625f)
     {
-        if (window->KeyHold(GLFW_KEY_S) && obj3D::checkAll(roadPoints, roadPointCount, glm::vec3(translateX - glm::normalize(forward).x * movementSpeed * deltaTime, 0.13f, translateZ - glm::normalize(forward).z * movementSpeed * deltaTime)))
+        if (window->KeyHold(GLFW_KEY_S) &&
+            obj3D::CheckAllTriangles(roadPoints, roadPointCount,
+                            glm::vec3(translateX - glm::normalize(forward).x * movementSpeed * deltaTime, 0.13f,
+                                      translateZ - glm::normalize(forward).z * movementSpeed * deltaTime)))
         {
             translateX -= glm::normalize(forward).x * movementSpeed * deltaTime;
             translateZ -= glm::normalize(forward).z * movementSpeed * deltaTime;
-            camera->MoveForward(-movementSpeed * deltaTime);
 
+            camera->MoveForward(-movementSpeed * deltaTime);
             miniCamera->position = glm::vec3(translateX, 15, translateZ);
         }
-        if (window->KeyHold(GLFW_KEY_W) && obj3D::checkAll(roadPoints, roadPointCount, glm::vec3(translateX + glm::normalize(forward).x * movementSpeed * deltaTime, 0.13f, translateZ + glm::normalize(forward).z * movementSpeed * deltaTime)))
+
+        if (window->KeyHold(GLFW_KEY_W) &&
+            obj3D::CheckAllTriangles(roadPoints, roadPointCount,
+                            glm::vec3(translateX + glm::normalize(forward).x * movementSpeed * deltaTime, 0.13f,
+                                      translateZ + glm::normalize(forward).z * movementSpeed * deltaTime)))
         {
             translateX += glm::normalize(forward).x * movementSpeed * deltaTime;
-                translateZ += glm::normalize(forward).z * movementSpeed * deltaTime;
-                camera->MoveForward(movementSpeed* deltaTime); // nu merge bn nici S
+            translateZ += glm::normalize(forward).z * movementSpeed * deltaTime;
 
-                //miniCamera->MoveForward(movementSpeed * deltaTime); // nu merge bn nici S
-                miniCamera->position = glm::vec3(translateX, 15, translateZ);
+            camera->MoveForward(movementSpeed* deltaTime);
+            miniCamera->position = glm::vec3(translateX, 15, translateZ);
         }
+
         if (window->KeyHold(GLFW_KEY_A))
         {
             angularStepOY += rotationSpeed * deltaTime;
@@ -639,59 +536,38 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
             camera->RotateThirdPerson_OY(rotationSpeed * deltaTime);
         }
 
-
         if (window->KeyHold(GLFW_KEY_D))
         {
             angularStepOY -= rotationSpeed * deltaTime;
             forward = glm::normalize(glm::rotate(glm::mat4(1.0f), -rotationSpeed * deltaTime, glm::vec3(0, 1, 0)) * glm::vec4(forward, 1));
-            //rightV = glm::normalize(glm::rotate(glm::mat4(1.0f), -rotationSpeed * deltaTime, glm::vec3(0, 1, 0)) * glm::vec4(rightV, 1));
             camera->RotateThirdPerson_OY(-rotationSpeed * deltaTime);
-            //miniCamera->forward = glm::normalize(forward);
-            //cout << "forward: " << forward << "\n";
-            //cout << "camera->forward: " << camera->forward << "\n";
-            //cout << "miniCamera->forward: " << miniCamera->forward << "\n";
-            //miniCamera->forward = forward;
-            //miniCamera->right = rightV;
-            //cout << camera->forward << "\n";
         }
     }
 }
 
-
 void Tema2::OnKeyPress(int key, int mods)
 {
-    // Add key press event
 }
-
 
 void Tema2::OnKeyRelease(int key, int mods)
 {
-    // Add key release event
 }
-
 
 void Tema2::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 {
-    // Add mouse move event
 }
-
 
 void Tema2::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 {
-    // Add mouse button press event
 }
-
 
 void Tema2::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
 {
-    // Add mouse button release event
 }
-
 
 void Tema2::OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY)
 {
 }
-
 
 void Tema2::OnWindowResize(int width, int height)
 {
