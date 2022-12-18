@@ -263,9 +263,9 @@ Texture2D* Lab9::CreateRandomTexture(unsigned int width, unsigned int height)
     unsigned char* data = new unsigned char[size];
 
     // TODO(student): Generate random texture data
-    for (int i = 0; i < size; i++)
+    for (unsigned int i = 0; i < size; i++)
     {
-        data[i] = rand();
+        data[i] = (unsigned char)rand();
     }
 
     // TODO(student): Generate and bind the new texture ID
