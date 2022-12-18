@@ -6,6 +6,40 @@
 #include "core/engine.h"
 #include "utils/gl_utils.h"
 
+Mesh* obj3D::CreatePlane(
+    const std::string& name,
+    glm::vec3 leftFarCorner,
+    float sizeX,
+    float sizeZ,
+    glm::vec3 color)
+{
+    std::vector<VertexFormat> vertices;
+
+    for (int j = 0; j < 1000; j++)
+        for (int i = 0; i < 1000; i++)
+            vertices.push_back(VertexFormat(leftFarCorner + glm::vec3((float)i / 999.0f * sizeX, 0, (float)j / 999.0f * sizeZ), glm::vec3(1), color));
+
+    Mesh* plane = new Mesh(name);
+    std::vector<unsigned int> indices;
+
+    for (int i = 0; i < 999; i++)
+    {
+        for (int j = 0; j < 999; j++)
+        {
+            indices.push_back(i * 1000 + j);
+            indices.push_back(i * 1000 + 1 + j);
+            indices.push_back((i + 1) * 1000 + 1 + j);
+
+            indices.push_back(i * 1000 + j);
+            indices.push_back((i + 1) * 1000 + j);
+            indices.push_back((i + 1) * 1000 + 1 + j);
+        }
+    }
+
+    plane->InitFromData(vertices, indices);
+    return plane;
+}
+
 Mesh* obj3D::CreateTree(
     const std::string& name,
     glm::vec3 leftBottomFarTrunkCorner,
@@ -84,59 +118,106 @@ Mesh* obj3D::GenerateCompleteRoad(
     const std::string& name,
     std::vector<glm::vec3> points,
     int pointCount,
-    glm::vec3 color)
+    glm::vec3 color,
+    bool fill)
 {
-    std::vector<VertexFormat> vertices;
+    std::vector<glm::vec3> redPoints;
+    std::vector<glm::vec3> bluePoints;
 
     float redDistance = 2.5f;
     float blueDistance = 1.5f;
-    //float blueDistance = 2.5f;
-    //std::cout << "Urmeaza pista:\n";
 
     for (int i = 0; i < pointCount - 1; i++)
     {
         glm::vec3 d = points[i + 1] - points[i];
         d = glm::normalize(d);
-        //std::cout << i << " " << d << "\n";
         glm::vec3 up = glm::vec3(0, 1, 0);
         glm::vec3 p = glm::cross(d, up);
-        glm::vec3 r = points[i] + redDistance * p;
-        glm::vec3 b = points[i] - blueDistance * p;
-        //std::cout << i << ": " << r << "\n";
-        vertices.push_back(VertexFormat(r, glm::vec3(1), color));
-        vertices.push_back(VertexFormat(b, glm::vec3(1), color));
+        redPoints.push_back(points[i] + redDistance * p);
+        bluePoints.push_back(points[i] - blueDistance * p);
     }
 
     glm::vec3 d = points[0] - points[pointCount - 1];
     d = glm::normalize(d);
-    //std::cout << "39 " << d << "\n";
     glm::vec3 up = glm::vec3(0, 1, 0);
     glm::vec3 p = glm::cross(d, up);
-    glm::vec3 r = points[pointCount - 1] + redDistance * p;
-    //std::cout << "39: " << r << "\n";
-    glm::vec3 b = points[pointCount - 1] - blueDistance * p;
-    vertices.push_back(VertexFormat(r, glm::vec3(1), color));
-    vertices.push_back(VertexFormat(b, glm::vec3(1), color));
+    redPoints.push_back(points[pointCount - 1] + redDistance * p);
+    bluePoints.push_back(points[pointCount - 1] - blueDistance * p);
+
+    std::vector<VertexFormat> vertices;
+    for (int i = 0; i < pointCount - 1; i++)
+    {
+        glm::vec3 dRed = redPoints[i + 1] - redPoints[i];
+        glm::vec3 dBlue = bluePoints[i + 1] - bluePoints[i];
+        //int j = 0;
+        for (int j = 0; j < 1000; j++)
+        {
+            vertices.push_back(VertexFormat(redPoints[i] + ((float)j / 1000.0f) * dRed, glm::vec3(1), color));
+            vertices.push_back(VertexFormat(bluePoints[i] + ((float)j / 1000.0f) * dBlue, glm::vec3(1), color));
+        }
+    }
+
+    glm::vec3 dRed = redPoints[0] - redPoints[pointCount - 1];
+    glm::vec3 dBlue = bluePoints[0] - bluePoints[pointCount - 1];
+    //int j = 0;
+    for (int j = 0; j < 1000; j++)
+    {
+        vertices.push_back(VertexFormat(redPoints[pointCount - 1] + ((float)j / 1000.0f) * dRed, glm::vec3(1), color));
+        vertices.push_back(VertexFormat(bluePoints[pointCount - 1] + ((float)j / 1000.0f) * dBlue, glm::vec3(1), color));
+    }
 
     Mesh* road = new Mesh(name);
     std::vector<unsigned int> indices;
 
+    //for (int i = 0; i < pointCount - 1; i++)
+    //{
+    //    indices.push_back(2 * i);
+    //    indices.push_back(2 * i + 1);
+    //    indices.push_back(2 * i + 3);
+
+    //    indices.push_back(2 * i);
+    //    indices.push_back(2 * i + 2);
+    //    indices.push_back(2 * i + 3);
+    //}
+
+    //indices.push_back(2 * (pointCount - 1));
+    //indices.push_back(2 * (pointCount - 1) + 1);
+    //indices.push_back(1);
+
+    //indices.push_back(2 * (pointCount - 1));
+    //indices.push_back(0);
+    //indices.push_back(1);
+
     for (int i = 0; i < pointCount - 1; i++)
     {
-        indices.push_back(2 * i);
-        indices.push_back(2 * i + 1);
-        indices.push_back(2 * i + 3);
+        for (int j = 0; j < 1000; j++)
+        {
+            indices.push_back(2000 * i + 2 * j);
+            indices.push_back(2000 * i + 1 + 2 * j);
+            indices.push_back(2000 * i + 3 + 2 * j);
 
-        indices.push_back(2 * i);
-        indices.push_back(2 * i + 2);
-        indices.push_back(2 * i + 3);
+            indices.push_back(2000 * i + 2 * j);
+            indices.push_back(2000 * i + 2 + 2 * j);
+            indices.push_back(2000 * i + 3 + 2 * j);
+        }
     }
 
-    indices.push_back(2 * (pointCount - 1));
-    indices.push_back(2 * (pointCount - 1) + 1);
+    for (int j = 0; j < 999; j++)
+    {
+        indices.push_back(2000 * (pointCount - 1) + 2 * j);
+        indices.push_back(2000 * (pointCount - 1) + 1 + 2 * j);
+        indices.push_back(2000 * (pointCount - 1) + 3 + 2 * j);
+
+        indices.push_back(2000 * (pointCount - 1) + 2 * j);
+        indices.push_back(2000 * (pointCount - 1) + 2 + 2 * j);
+        indices.push_back(2000 * (pointCount - 1) + 3 + 2 * j);
+    }
+
+    indices.push_back(2000 * (pointCount - 1) + 2 * 999);
+    indices.push_back(2000 * (pointCount - 1) + 1 + 2 * 999);
     indices.push_back(1);
 
-    indices.push_back(2 * (pointCount - 1));
+    indices.push_back(2000 * (pointCount - 1) + 2 * 999);
     indices.push_back(0);
     indices.push_back(1);
 

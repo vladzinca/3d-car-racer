@@ -68,6 +68,7 @@ namespace m1
         int purpleEnemy_counter, yellowEnemy_counter;
         
         glm::vec3 position;
+        glm::vec3 carPosition;
         glm::vec3 forward;
         float cx, cz;
 

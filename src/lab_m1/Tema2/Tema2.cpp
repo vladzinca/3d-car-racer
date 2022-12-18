@@ -146,6 +146,7 @@ void Tema2::Init()
     translateZ = 0;
 
     position = glm::vec3(-0.25f, 0.15f, -0.5f);
+    carPosition = glm::vec3(-0.25f, 0.15f, -0.5f);
 
     angularStepOY = 0;
 
@@ -194,23 +195,23 @@ void Tema2::Init()
     //Mesh* myCube = obj3D::CreateCube("myCube", glm::vec3(0, 0, 0), 1, glm::vec3(1, 1, 0));
     //AddMeshToList(myCube);
 
-    Mesh* green_plane = obj3D::CreateCuboid("green_plane", glm::vec3(-64, 0, -64), 128, 0.1f, 128, glm::vec3(0.5f, 0.8f, 0.3f));
+    Mesh* green_plane = obj3D::CreatePlane("green_plane", glm::vec3(-64, 0.05f, -64), 128, 128, glm::vec3(0.5f, 0.8f, 0.3f)); // pune totusi -64, 0.1f, -64f sa vezi daca merge
     AddMeshToList(green_plane);
 
-    Mesh* horizon_top = obj3D::CreateCuboid("horizon_top", glm::vec3(-64, 64, -64), 128, 0.1f, 128, glm::vec3(0.5f, 0.8f, 0.9f));
-    AddMeshToList(horizon_top);
+    //Mesh* horizon_top = obj3D::CreateCuboid("horizon_top", glm::vec3(-64, 64, -64), 128, 0.1f, 128, glm::vec3(0.5f, 0.8f, 0.9f));
+    //AddMeshToList(horizon_top);
 
-    Mesh* horizon_back = obj3D::CreateCuboid("horizon_back", glm::vec3(-64, 0, 64), 128, 64, 0.1f, glm::vec3(0.5f, 0.8f, 0.9f));
-    AddMeshToList(horizon_back);
+    //Mesh* horizon_back = obj3D::CreateCuboid("horizon_back", glm::vec3(-64, 0, 64), 128, 64, 0.1f, glm::vec3(0.5f, 0.8f, 0.9f));
+    //AddMeshToList(horizon_back);
 
-    Mesh* horizon_right = obj3D::CreateCuboid("horizon_right", glm::vec3(64, 0, -64), 0.1f, 64, 128, glm::vec3(0.5f, 0.8f, 0.9f));
-    AddMeshToList(horizon_right);
+    //Mesh* horizon_right = obj3D::CreateCuboid("horizon_right", glm::vec3(64, 0, -64), 0.1f, 64, 128, glm::vec3(0.5f, 0.8f, 0.9f));
+    //AddMeshToList(horizon_right);
 
-    Mesh* horizon_front = obj3D::CreateCuboid("horizon_front", glm::vec3(-64, 0, -64), 128, 64, 0.1f, glm::vec3(0.5f, 0.8f, 0.9f));
-    AddMeshToList(horizon_front);
+    //Mesh* horizon_front = obj3D::CreateCuboid("horizon_front", glm::vec3(-64, 0, -64), 128, 64, 0.1f, glm::vec3(0.5f, 0.8f, 0.9f));
+    //AddMeshToList(horizon_front);
 
-    Mesh* horizon_left = obj3D::CreateCuboid("horizon_left", glm::vec3(-64, 0, -64), 0.1f, 64, 128, glm::vec3(0.5f, 0.8f, 0.9f));
-    AddMeshToList(horizon_left);
+    //Mesh* horizon_left = obj3D::CreateCuboid("horizon_left", glm::vec3(-64, 0, -64), 0.1f, 64, 128, glm::vec3(0.5f, 0.8f, 0.9f));
+    //AddMeshToList(horizon_left);
 
     roadPointCount = 40;
     
@@ -356,7 +357,8 @@ void Tema2::Init()
     //for (int i = 0; i < 40; i++)
         //cout << i << ": " << enemy1Points[i] << "\n";
 
-    Mesh* road = obj3D::GenerateCompleteRoad("road", roadPoints, roadPointCount, glm::vec3(0.2f, 0.2f, 0.2f));
+
+    Mesh* road = obj3D::GenerateCompleteRoad("road", roadPoints, roadPointCount, glm::vec3(0.2f, 0.2f, 0.2f), false);
     AddMeshToList(road);
 
     Mesh* car = obj3D::CreateCuboid("car", position, 0.5f, 0.5f, 1.0f, glm::vec3(0, 1, 1));
@@ -372,6 +374,9 @@ void Tema2::Init()
     {
         treeNames.push_back("tree" + std::to_string(i));
     }
+
+    for (int i = 0; i < 80; i++)
+        treeCoordinates[i].y -= 0.15f;
 
     for (int i = 0; i < 80; i++)
     {
@@ -436,6 +441,11 @@ Mesh* Tema2::CreateMesh(const char *name, const std::vector<VertexFormat> &verti
     //// Set vertex color attribute
     glEnableVertexAttribArray(3);
     glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3) + sizeof(glm::vec2))); // citeste dupa 8 float-uri
+
+    // Set vertex car position attribute
+    //glEnableVertexAttribArray(4);
+    //glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(3 * sizeof(glm::vec3) + sizeof(glm::vec2))); // citeste dupa 3 float-uri, 3 * 8 = 24 bytes
+
     // ========================================================================
 
     // Unbind the VAO
@@ -456,7 +466,7 @@ Mesh* Tema2::CreateMesh(const char *name, const std::vector<VertexFormat> &verti
 void Tema2::FrameStart()
 {
     // Clears the color buffer (using the previously set color) and depth buffer
-    glClearColor(0, 0, 0, 1);
+    glClearColor(0.5f, 0.8f, 0.9f, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::ivec2 resolution = window->GetResolution();
@@ -467,38 +477,33 @@ void Tema2::FrameStart()
 void Tema2::RenderScene(float deltaTimeSeconds) {
     {
         glm::mat4 modelMatrix = glm::mat4(1);
-        RenderSimpleMesh(meshes["myCube"], shaders["LabShader"], modelMatrix);
-    }
-
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
         RenderSimpleMesh(meshes["green_plane"], shaders["LabShader"], modelMatrix);
     }
 
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        RenderSimpleMesh(meshes["horizon_top"], shaders["LabShader"], modelMatrix);
-    }
+    //{
+    //    glm::mat4 modelMatrix = glm::mat4(1);
+    //    RenderSimpleMesh(meshes["horizon_top"], shaders["LabShader"], modelMatrix);
+    //}
 
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        RenderSimpleMesh(meshes["horizon_back"], shaders["LabShader"], modelMatrix);
-    }
+    //{
+    //    glm::mat4 modelMatrix = glm::mat4(1);
+    //    RenderSimpleMesh(meshes["horizon_back"], shaders["LabShader"], modelMatrix);
+    //}
 
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        RenderSimpleMesh(meshes["horizon_right"], shaders["LabShader"], modelMatrix);
-    }
+    //{
+    //    glm::mat4 modelMatrix = glm::mat4(1);
+    //    RenderSimpleMesh(meshes["horizon_right"], shaders["LabShader"], modelMatrix);
+    //}
 
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        RenderSimpleMesh(meshes["horizon_front"], shaders["LabShader"], modelMatrix);
-    }
+    //{
+    //    glm::mat4 modelMatrix = glm::mat4(1);
+    //    RenderSimpleMesh(meshes["horizon_front"], shaders["LabShader"], modelMatrix);
+    //}
 
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        RenderSimpleMesh(meshes["horizon_left"], shaders["LabShader"], modelMatrix);
-    }
+    //{
+    //    glm::mat4 modelMatrix = glm::mat4(1);
+    //    RenderSimpleMesh(meshes["horizon_left"], shaders["LabShader"], modelMatrix);
+    //}
 
     {
         glm::mat4 modelMatrix = glm::mat4(1);
@@ -521,7 +526,7 @@ void Tema2::RenderScene(float deltaTimeSeconds) {
     }
 
     {
-        if (initialTime >= 2.5f)
+        if (initialTime >= 10.0f)
         {
             glm::mat4 modelMatrix = glm::mat4(1);
             modelMatrix *= transf3D::Translate(purpleEnemy_translateX, 0, purpleEnemy_translateZ);
@@ -533,7 +538,7 @@ void Tema2::RenderScene(float deltaTimeSeconds) {
     }
 
     {
-        if (initialTime >= 2.5f)
+        if (initialTime >= 10.0f)
         {
             glm::mat4 modelMatrix = glm::mat4(1);
             modelMatrix *= transf3D::Translate(yellowEnemy_translateX, 0, yellowEnemy_translateZ);
@@ -550,38 +555,33 @@ void Tema2::RenderScene(float deltaTimeSeconds) {
 void Tema2::RenderScene2(float deltaTimeSeconds) {
     {
         glm::mat4 modelMatrix = glm::mat4(1);
-        RenderSimpleMesh2(meshes["myCube"], shaders["LabShader2"], modelMatrix);
-    }
-
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
         RenderSimpleMesh2(meshes["green_plane"], shaders["LabShader2"], modelMatrix);
     }
 
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        RenderSimpleMesh2(meshes["horizon_top"], shaders["LabShader2"], modelMatrix);
-    }
+    //{
+    //    glm::mat4 modelMatrix = glm::mat4(1);
+    //    RenderSimpleMesh2(meshes["horizon_top"], shaders["LabShader2"], modelMatrix);
+    //}
 
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        RenderSimpleMesh2(meshes["horizon_back"], shaders["LabShader2"], modelMatrix);
-    }
+    //{
+    //    glm::mat4 modelMatrix = glm::mat4(1);
+    //    RenderSimpleMesh2(meshes["horizon_back"], shaders["LabShader2"], modelMatrix);
+    //}
 
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        RenderSimpleMesh2(meshes["horizon_right"], shaders["LabShader2"], modelMatrix);
-    }
+    //{
+    //    glm::mat4 modelMatrix = glm::mat4(1);
+    //    RenderSimpleMesh2(meshes["horizon_right"], shaders["LabShader2"], modelMatrix);
+    //}
 
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        RenderSimpleMesh2(meshes["horizon_front"], shaders["LabShader2"], modelMatrix);
-    }
+    //{
+    //    glm::mat4 modelMatrix = glm::mat4(1);
+    //    RenderSimpleMesh2(meshes["horizon_front"], shaders["LabShader2"], modelMatrix);
+    //}
 
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        RenderSimpleMesh2(meshes["horizon_left"], shaders["LabShader2"], modelMatrix);
-    }
+    //{
+    //    glm::mat4 modelMatrix = glm::mat4(1);
+    //    RenderSimpleMesh2(meshes["horizon_left"], shaders["LabShader2"], modelMatrix);
+    //}
 
     {
         glm::mat4 modelMatrix = glm::mat4(1);
@@ -593,6 +593,7 @@ void Tema2::RenderScene2(float deltaTimeSeconds) {
         modelMatrix *= transf3D::Translate(translateX, 0, translateZ);
         modelMatrix *= transf3D::RotateOY(angularStepOY);
         RenderSimpleMesh2(meshes["car"], shaders["LabShader2"], modelMatrix);
+        carPosition = glm::vec3(translateX, 0.15f, translateZ);
     }
 
     {
@@ -604,7 +605,7 @@ void Tema2::RenderScene2(float deltaTimeSeconds) {
     }
 
     {
-        if (initialTime >= 2.5f)
+        if (initialTime >= 10.0f)
         {
             glm::mat4 modelMatrix = glm::mat4(1);
             modelMatrix *= transf3D::Translate(purpleEnemy_translateX, 0, purpleEnemy_translateZ);
@@ -616,7 +617,7 @@ void Tema2::RenderScene2(float deltaTimeSeconds) {
     }
 
     {
-        if (initialTime >= 2.5f)
+        if (initialTime >= 10.0f)
         {
             glm::mat4 modelMatrix = glm::mat4(1);
             modelMatrix *= transf3D::Translate(yellowEnemy_translateX, 0, yellowEnemy_translateZ);
@@ -635,11 +636,15 @@ void Tema2::Update(float deltaTimeSeconds)
     glm::ivec2 resolution = window->GetResolution();
     glViewport(0, 0, resolution.x, resolution.y);
 
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
     float enemyMovementSpeed = 5.0f;
 
     initialTime += deltaTimeSeconds;
 
-    if (initialTime >= 2.5f)
+    cout << initialTime << "\n";
+
+    if (initialTime >= 10.0f)
     {
         if ((glm::abs(purpleEnemy_translateX + 0.25f - purpleEnemyPoints[purpleEnemy_counter].x) < 0.1f) && (glm::abs(purpleEnemy_translateZ + 0.5f - purpleEnemyPoints[purpleEnemy_counter].z) < 0.1f))
         {
@@ -748,15 +753,15 @@ void Tema2::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & model
     // TODO(student): Get shader location for uniform mat4 "Projection"
     int location3 = glGetUniformLocation(shader->program, "Projection");
 
-    projectionMatrix = glm::perspective(RADIANS(fov), window->props.aspectRatio, zNear, zFar);
+    int location4 = glGetUniformLocation(shader->program, "carPosition");
 
-    int location = glGetUniformLocation(shader->program, "car_position");
-    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(camera->GetTargetPosition()));
+
+    projectionMatrix = glm::perspective(RADIANS(fov), window->props.aspectRatio, zNear, zFar);
 
     glUniformMatrix4fv(location1, 1, GL_FALSE, glm::value_ptr(modelMatrix));
     glUniformMatrix4fv(location2, 1, GL_FALSE, glm::value_ptr(camera->GetViewMatrix()));
     glUniformMatrix4fv(location3, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-
+    glUniformMatrix4fv(location4, 1, GL_FALSE, glm::value_ptr(carPosition));
     //glUniformMatrix4fv(location4, 1, GL_FALSE, glm::value_ptr(modelMatrix));
     //glUniformMatrix4fv(location5, 1, GL_FALSE, glm::value_ptr(miniCamera->GetViewMatrix()));
     //glUniformMatrix4fv(location6, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
@@ -779,7 +784,7 @@ void Tema2::RenderSimpleMesh2(Mesh* mesh, Shader* shader2, const glm::mat4& mode
     glUseProgram(shader2->program);
 
     // TODO(student): Get shader location for uniform mat4 "Model"
-    int location4 = glGetUniformLocation(shader2->program, "Model");
+    int location5 = glGetUniformLocation(shader2->program, "Model");
     //int location = glGetUniformLocation(shader->program, "Nume1");
     //glUniform1f(location, 3.12312f);
     //glUniform1i(location, 3); // daca vreau sa trimit un int
@@ -788,21 +793,21 @@ void Tema2::RenderSimpleMesh2(Mesh* mesh, Shader* shader2, const glm::mat4& mode
     // TODO(student): Set shader uniform "Model" to modelMatrix
 
     // TODO(student): Get shader location for uniform mat4 "View"
-    int location5 = glGetUniformLocation(shader2->program, "View");
+    int location6 = glGetUniformLocation(shader2->program, "View");
 
     // TODO(student): Set shader uniform "View" to viewMatrix
     //glm::mat4 viewMatrix = camera->GetViewMatrix();
     //glm::mat4 viewMatrix = GetSceneCamera()->GetViewMatrix();
 
     // TODO(student): Get shader location for uniform mat4 "Projection"
-    int location6 = glGetUniformLocation(shader2->program, "Projection");
+    int location7 = glGetUniformLocation(shader2->program, "Projection");
 
     projectionMatrix = glm::ortho(left, right, bottom, up, zNear, zFar);
 
 
-    glUniformMatrix4fv(location4, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    glUniformMatrix4fv(location5, 1, GL_FALSE, glm::value_ptr(miniCamera->GetViewMatrix()));
-    glUniformMatrix4fv(location6, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+    glUniformMatrix4fv(location5, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    glUniformMatrix4fv(location6, 1, GL_FALSE, glm::value_ptr(miniCamera->GetViewMatrix()));
+    glUniformMatrix4fv(location7, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
     //glUniformMatrix4fv(location4, 1, GL_FALSE, glm::value_ptr(modelMatrix));
     //glUniformMatrix4fv(location5, 1, GL_FALSE, glm::value_ptr(miniCamera->GetViewMatrix()));
