@@ -51,7 +51,7 @@ void Lab4::Init()
 
     // Sets the resolution of the small viewport
     glm::ivec2 resolution = window->GetResolution();
-    miniViewportArea = ViewportArea(50, 50, (int)(resolution.x / 5.0f), (int)(resolution.y / 5.0f));
+    miniViewportArea = ViewportArea(50, 50, (int)(resolution.x / 5.f), (int)(resolution.y / 5.f));
 }
 
 void Lab4::FrameStart()
@@ -97,7 +97,6 @@ void Lab4::Update(float deltaTimeSeconds)
     glViewport(miniViewportArea.x, miniViewportArea.y, miniViewportArea.width, miniViewportArea.height);
 
     // TODO(student): render the scene again, in the new viewport
-    RenderScene();
     DrawCoordinateSystem();
 }
 
@@ -115,50 +114,7 @@ void Lab4::FrameEnd()
 void Lab4::OnInputUpdate(float deltaTime, int mods)
 {
     // TODO(student): Add transformation logic
-    if (window->KeyHold(GLFW_KEY_D))
-        translateX += deltaTime;
-    if (window->KeyHold(GLFW_KEY_A))
-        translateX -= deltaTime;
-    if (window->KeyHold(GLFW_KEY_R))
-        translateY += deltaTime;
-    if (window->KeyHold(GLFW_KEY_F))
-        translateY -= deltaTime;
-    if (window->KeyHold(GLFW_KEY_S))
-        translateZ += deltaTime;
-    if (window->KeyHold(GLFW_KEY_W))
-        translateZ -= deltaTime;
-    if (window->KeyHold(GLFW_KEY_1)) {
-        scaleX += deltaTime;
-        scaleY += deltaTime;
-        scaleZ += deltaTime;
-    }
-    if (window->KeyHold(GLFW_KEY_2) && scaleX > 0 && scaleY > 0 && scaleZ > 0) {
-        scaleX -= deltaTime;
-        scaleY -= deltaTime;
-        scaleZ -= deltaTime;
-    }
-    if (window->KeyHold(GLFW_KEY_3))
-        angularStepOX += 2 * deltaTime;
-    if (window->KeyHold(GLFW_KEY_4))
-        angularStepOX -= 2 * deltaTime;
-    if (window->KeyHold(GLFW_KEY_5))
-        angularStepOY += 2 * deltaTime;
-    if (window->KeyHold(GLFW_KEY_6))
-        angularStepOY -= 2 * deltaTime;
-    if (window->KeyHold(GLFW_KEY_7))
-        angularStepOZ += 2 * deltaTime;
-    if (window->KeyHold(GLFW_KEY_8))
-        angularStepOZ -= 2 * deltaTime;
-    if (window->KeyHold(GLFW_KEY_9)) {
-        angularStepOX -= 1.5f * deltaTime;
-        angularStepOY += 1.5f * deltaTime;
-        angularStepOZ += 1.5f * deltaTime;
-    }
-    if (window->KeyHold(GLFW_KEY_0)) {
-        angularStepOX += 1.5f * deltaTime;
-        angularStepOY -= 1.5f * deltaTime;
-        angularStepOZ -= 1.5f * deltaTime;
-    }
+
 }
 
 
@@ -182,27 +138,6 @@ void Lab4::OnKeyPress(int key, int mods)
     }
     
     // TODO(student): Add viewport movement and scaling logic
-    if (key == GLFW_KEY_L)
-        miniViewportArea.x += 100;
-    if (key == GLFW_KEY_J)
-        miniViewportArea.x -= 100;
-    if (key == GLFW_KEY_I)
-        miniViewportArea.y += 100;
-    if (key == GLFW_KEY_K)
-        miniViewportArea.y -= 100;
-    glm::ivec2 resolution = window->GetResolution();
-    if (key == GLFW_KEY_U) {
-        miniViewportArea.x -= resolution.x / 64;
-        miniViewportArea.y -= resolution.y / 64;
-        miniViewportArea.width += resolution.x / 32;
-        miniViewportArea.height += resolution.y / 32;
-    }
-    if (key == GLFW_KEY_O && (miniViewportArea.width > resolution.x / 32) && (miniViewportArea.height > resolution.y / 32)) {
-        miniViewportArea.x += resolution.x / 64;
-        miniViewportArea.y += resolution.y / 64;
-        miniViewportArea.width -= resolution.x / 32;
-        miniViewportArea.height -= resolution.y / 32;
-    }
 }
 
 

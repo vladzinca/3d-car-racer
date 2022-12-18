@@ -9,10 +9,7 @@ namespace transform2D
     inline glm::mat3 Translate(float translateX, float translateY)
     {
         // TODO(student): Implement the translation matrix
-        return glm::mat3(
-            1, 0, 0,
-            0, 1, 0,
-            translateX, translateY, 1);
+        return glm::mat3(1);
 
     }
 
@@ -20,10 +17,7 @@ namespace transform2D
     inline glm::mat3 Scale(float scaleX, float scaleY)
     {
         // TODO(student): Implement the scaling matrix
-        return glm::mat3(
-            scaleX, 0, 0,
-            0, scaleY, 0,
-            0, 0, 1);
+        return glm::mat3(1);
 
     }
 
@@ -31,10 +25,7 @@ namespace transform2D
     inline glm::mat3 Rotate(float radians)
     {
         // TODO(student): Implement the rotation matrix
-        return glm::mat3(
-            cosf(radians), sinf(radians), 0,
-            -sinf(radians), cosf(radians), 0,
-            0, 0, 1);
+        return glm::mat3(1);
 
     }
 }   // namespace transform2D

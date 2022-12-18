@@ -28,11 +28,6 @@ namespace m1
         void OnWindowResize(int width, int height) override;
 
         // TODO(student): Class variables go here
-        float clearR, clearG, clearB;
-
-        std::string cycleMesh;
-
-        float x, y, z;
 
     };
 }   // namespace m1

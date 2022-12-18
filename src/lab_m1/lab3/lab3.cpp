@@ -43,10 +43,6 @@ void Lab3::Init()
     // then in the `cx` and `cy` class variables (see the header). Use
     // `corner` and `squareSide`. These two class variables will be used
     // in the `Update()` function. Think about it, why do you need them?
-    cx = corner.x + squareSide / 2.0f;
-    cy = corner.y + squareSide / 2.0f;
-    dirX = 1;
-    dirY = 1;
 
     // Initialize tx and ty (the translation steps)
     translateX = 0;
@@ -94,18 +90,6 @@ void Lab3::Update(float deltaTimeSeconds)
     // TODO(student): Create animations by multiplying the current
     // transform matrix with the matrices you just implemented.
     // Remember, the last matrix in the chain will take effect first!
-    if (translateX > 200) {
-        dirX = -1;
-        dirY = -1;
-    }
-    if (translateX < 0) {
-        dirX = 1;
-        dirY = 1;
-    }
-    translateX += deltaTimeSeconds * 100 * dirX;
-    translateY += deltaTimeSeconds * 100 * dirY;
-    modelMatrix *= transform2D::Translate(translateX, translateY);
-
 
     RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);
 
@@ -114,11 +98,6 @@ void Lab3::Update(float deltaTimeSeconds)
     // TODO(student): Create animations by multiplying the current
     // transform matrix with the matrices you just implemented
     // Remember, the last matrix in the chain will take effect first!
-    angularStep += deltaTimeSeconds * 2.5f;
-
-    modelMatrix *= transform2D::Translate(cx, cy);
-    modelMatrix *= transform2D::Rotate(angularStep);
-    modelMatrix *= transform2D::Translate(-cx, -cy);
 
     RenderMesh2D(meshes["square2"], shaders["VertexColor"], modelMatrix);
 
@@ -127,9 +106,6 @@ void Lab3::Update(float deltaTimeSeconds)
     // TODO(student): Create animations by multiplying the current
     // transform matrix with the matrices you just implemented
     // Remember, the last matrix in the chain will take effect first!
-    scaleX += deltaTimeSeconds * 0.5f;
-    scaleY += deltaTimeSeconds * 0.5f;
-    modelMatrix *= transform2D::Scale(scaleX, scaleY);
 
     RenderMesh2D(meshes["square3"], shaders["VertexColor"], modelMatrix);
 }

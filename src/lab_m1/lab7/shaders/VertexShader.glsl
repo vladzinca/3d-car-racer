@@ -26,21 +26,15 @@ out vec3 color;
 void main()
 {
     // TODO(student): Compute world space vectors
-    vec3 world_pos = (Model * vec4(v_position,1)).xyz;
-    vec3 world_normal = normalize( mat3(Model) * v_normal );
-    vec3 L = normalize( light_position - world_pos );
-    vec3 V = normalize( eye_position - world_pos );
-    vec3 H = normalize( L + V );
-    vec3 R = reflect (-L, world_normal);
 
     // TODO(student): Define ambient light component
-    float ambient_light = material_kd * 0.25;
+    float ambient_light = 0.25;
 
     // TODO(student): Compute diffuse light component
-    float diffuse_light = material_kd * 1 * max (dot(world_normal,L), 0);
+    float diffuse_light = 0;
 
     // TODO(student): Compute specular light component
-    float specular_light = material_ks * 1 * (dot(world_normal,L) > 0 ? 1 : 0) * pow(max(dot(V, R), 0), material_shininess);
+    float specular_light = 0;
 
     // It's important to distinguish between "reflection model" and
     // "shading method". In this shader, we are experimenting with the Phong
@@ -53,13 +47,9 @@ void main()
     }
 
     // TODO(student): Compute light
-    float d = distance(light_position, world_pos);
-    float factorAtenuare = 1 / (d * d);
-    float light = ambient_light + factorAtenuare * (diffuse_light + specular_light);
 
     // TODO(student): Send color light output to fragment shader
     color = vec3(1);
-    color = object_color * light;
 
     gl_Position = Projection * View * Model * vec4(v_position, 1.0);
 }

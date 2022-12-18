@@ -60,7 +60,6 @@ void Lab8::Init()
         materialShininess = 30;
         materialKd = 0.5;
         materialKs = 0.5;
-        spotlight = 0;
     }
 }
 
@@ -164,8 +163,6 @@ void Lab8::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & modelM
     glUniform3f(object_color, color.r, color.g, color.b);
 
     // TODO(student): Set any other shader uniforms that you need
-    int type_of_light = glGetUniformLocation(shader->program, "is_spotlight");
-    glUniform1i(type_of_light, spotlight);
 
     // Bind model matrix
     GLint loc_model_matrix = glGetUniformLocation(shader->program, "Model");
@@ -223,13 +220,7 @@ void Lab8::OnKeyPress(int key, int mods)
     // Add key press event
 
     // TODO(student): Set keys that you might need
-    if (key == GLFW_KEY_F)
-    {
-        if (spotlight == 0)
-            spotlight = 1;
-        else
-            spotlight = 0;
-    }
+
 }
 
 

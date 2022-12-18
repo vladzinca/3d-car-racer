@@ -37,7 +37,6 @@ namespace m1
         float materialKs;
 
         // TODO(student): If you need any other class variables, define them here.
-        int spotlight;
 
     };
 }   // namespace m1

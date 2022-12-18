@@ -115,15 +115,15 @@ Mesh* Lab6::CreateMesh(const char *name, const std::vector<VertexFormat> &vertic
 
     // Set vertex normal attribute
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(sizeof(glm::vec3))); // citeste dupa 3 float-uri, 3 * 8 = 24 bytes
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(sizeof(glm::vec3)));
 
     // Set texture coordinate attribute
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3))); // citeste dupa 6 float-uri
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3)));
 
     // Set vertex color attribute
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3) + sizeof(glm::vec2))); // citeste dupa 8 float-uri
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3) + sizeof(glm::vec2)));
     // ========================================================================
 
     // Unbind the VAO
@@ -195,29 +195,18 @@ void Lab6::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & modelM
     glUseProgram(shader->program);
 
     // TODO(student): Get shader location for uniform mat4 "Model"
-    int location1 = glGetUniformLocation(shader->program, "Model");
-    //int location = glGetUniformLocation(shader->program, "Nume1");
-    //glUniform1f(location, 3.12312f);
-    //glUniform1i(location, 3); // daca vreau sa trimit un int
-    //glUniform3f(location, /* 3 float-uri */);
 
     // TODO(student): Set shader uniform "Model" to modelMatrix
 
     // TODO(student): Get shader location for uniform mat4 "View"
-    int location2 = glGetUniformLocation(shader->program, "View");
 
     // TODO(student): Set shader uniform "View" to viewMatrix
     glm::mat4 viewMatrix = GetSceneCamera()->GetViewMatrix();
 
     // TODO(student): Get shader location for uniform mat4 "Projection"
-    int location3 = glGetUniformLocation(shader->program, "Projection");
 
     // TODO(student): Set shader uniform "Projection" to projectionMatrix
     glm::mat4 projectionMatrix = GetSceneCamera()->GetProjectionMatrix();
-
-    glUniformMatrix4fv(location1, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    glUniformMatrix4fv(location2, 1, GL_FALSE, glm::value_ptr(viewMatrix));
-    glUniformMatrix4fv(location3, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
     // Draw the object
     glBindVertexArray(mesh->GetBuffers()->m_VAO);
