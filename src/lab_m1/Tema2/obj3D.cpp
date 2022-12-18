@@ -6,6 +6,85 @@
 #include "core/engine.h"
 #include "utils/gl_utils.h"
 
+float obj3D::computeArea(glm::vec3 A, glm::vec3 B, glm::vec3 C)
+{
+    return  glm::length(glm::cross(B - A, C - A)) / 2.0f;
+}
+
+int obj3D::checkPoint(glm::vec3 A, glm::vec3 B, glm::vec3 C, glm::vec3 P)
+{
+    float totalArea = computeArea(A, B, C);
+    float area1 = computeArea(A, C, P);
+    float area2 = computeArea(A, B, P);
+    float area3 = computeArea(B, C, P);
+
+    if (abs((area1 + area2 + area3) - totalArea) < 0.0001)
+        return 1;
+
+    return 0;
+}
+
+int obj3D::checkAll(std::vector<glm::vec3> points, int pointCount, glm::vec3 P)
+{
+    std::vector<glm::vec3> vertices;
+
+    float redDistance = 2.5f;
+    float blueDistance = 1.5f;
+
+    for (int i = 0; i < pointCount - 1; i++)
+    {
+        int tmp = i + 1;
+        glm::vec3 d = points[tmp] - points[i];
+        d = glm::normalize(d);
+        glm::vec3 up = glm::vec3(0, 1, 0);
+        glm::vec3 p = glm::cross(d, up);
+        glm::vec3 r = points[i] + redDistance * p;
+        glm::vec3 b = points[i] - blueDistance * p;
+        vertices.push_back(r);
+        vertices.push_back(b);
+    }
+
+    int tmp = pointCount - 1;
+    glm::vec3 d = points[0] - points[tmp];
+    d = glm::normalize(d);
+    glm::vec3 up = glm::vec3(0, 1, 0);
+    glm::vec3 p = glm::cross(d, up);
+    glm::vec3 r = points[tmp] + redDistance * p;
+    glm::vec3 b = points[tmp] - blueDistance * p;
+    vertices.push_back(r);
+    vertices.push_back(b);
+
+    for (int i = 0; i < pointCount - 1; i++)
+    {
+        int tmp_a = 2 * i;
+        int tmp_b = 2 * i + 1;
+        int tmp_c = 2 * i + 2;
+        int tmp_d = 2 * i + 3;
+
+        if (checkPoint(vertices[tmp_a], vertices[tmp_b], vertices[tmp_d], P))
+            return 1;
+        if (checkPoint(vertices[tmp_a], vertices[tmp_c], vertices[tmp_d], P))
+            return 1;
+    }
+
+    int tmp_a = 2 * (pointCount - 1);
+    int tmp_b = 2 * (pointCount - 1) + 1;
+
+    if (checkPoint(vertices[tmp_a], vertices[tmp_b], vertices[1], P))
+        return 1;
+    if (checkPoint(vertices[tmp_a], vertices[0], vertices[1], P))
+        return 1;
+
+    return 0;
+}
+
+int obj3D::checkCollision(glm::vec3 A, glm::vec3 B, float aRadius, float bRadius)
+{
+    if (sqrt(pow((A.x - B.x), 2) + pow((A.y - B.y), 2) + pow((A.z - B.z), 2)) <= aRadius + bRadius)
+        return 1;
+    return 0;
+}
+
 Mesh* obj3D::CreatePlane(
     const std::string& name,
     glm::vec3 leftFarCorner,
@@ -114,22 +193,21 @@ Mesh* obj3D::CreateTree(
     return tree;
 }
 
-Mesh* obj3D::GenerateCompleteRoad(
+Mesh* obj3D::CreateRoad(
     const std::string& name,
     std::vector<glm::vec3> points,
     int pointCount,
-    glm::vec3 color,
-    bool fill)
+    float redDistance,
+    float blueDistance,
+    glm::vec3 color)
 {
     std::vector<glm::vec3> redPoints;
     std::vector<glm::vec3> bluePoints;
 
-    float redDistance = 2.5f;
-    float blueDistance = 1.5f;
-
     for (int i = 0; i < pointCount - 1; i++)
     {
-        glm::vec3 d = points[i + 1] - points[i];
+        int tmp = i + 1;
+        glm::vec3 d = points[tmp] - points[i];
         d = glm::normalize(d);
         glm::vec3 up = glm::vec3(0, 1, 0);
         glm::vec3 p = glm::cross(d, up);
@@ -137,18 +215,20 @@ Mesh* obj3D::GenerateCompleteRoad(
         bluePoints.push_back(points[i] - blueDistance * p);
     }
 
-    glm::vec3 d = points[0] - points[pointCount - 1];
+    int tmp = pointCount - 1;
+    glm::vec3 d = points[0] - points[tmp];
     d = glm::normalize(d);
     glm::vec3 up = glm::vec3(0, 1, 0);
     glm::vec3 p = glm::cross(d, up);
-    redPoints.push_back(points[pointCount - 1] + redDistance * p);
-    bluePoints.push_back(points[pointCount - 1] - blueDistance * p);
+    redPoints.push_back(points[tmp] + redDistance * p);
+    bluePoints.push_back(points[tmp] - blueDistance * p);
 
     std::vector<VertexFormat> vertices;
     for (int i = 0; i < pointCount - 1; i++)
     {
-        glm::vec3 dRed = redPoints[i + 1] - redPoints[i];
-        glm::vec3 dBlue = bluePoints[i + 1] - bluePoints[i];
+        tmp = i + 1;
+        glm::vec3 dRed = redPoints[tmp] - redPoints[i];
+        glm::vec3 dBlue = bluePoints[tmp] - bluePoints[i];
         //int j = 0;
         for (int j = 0; j < 1000; j++)
         {
@@ -157,13 +237,14 @@ Mesh* obj3D::GenerateCompleteRoad(
         }
     }
 
-    glm::vec3 dRed = redPoints[0] - redPoints[pointCount - 1];
-    glm::vec3 dBlue = bluePoints[0] - bluePoints[pointCount - 1];
+    tmp = pointCount - 1;
+    glm::vec3 dRed = redPoints[0] - redPoints[tmp];
+    glm::vec3 dBlue = bluePoints[0] - bluePoints[tmp];
     //int j = 0;
     for (int j = 0; j < 1000; j++)
     {
-        vertices.push_back(VertexFormat(redPoints[pointCount - 1] + ((float)j / 1000.0f) * dRed, glm::vec3(1), color));
-        vertices.push_back(VertexFormat(bluePoints[pointCount - 1] + ((float)j / 1000.0f) * dBlue, glm::vec3(1), color));
+        vertices.push_back(VertexFormat(redPoints[tmp] + ((float)j / 1000.0f) * dRed, glm::vec3(1), color));
+        vertices.push_back(VertexFormat(bluePoints[tmp] + ((float)j / 1000.0f) * dBlue, glm::vec3(1), color));
     }
 
     Mesh* road = new Mesh(name);

@@ -11,7 +11,6 @@ layout(location=3) in vec3 color;
 uniform mat4 Model;
 uniform mat4 View;
 uniform mat4 Projection;
-uniform vec3 carPosition; // scoate asta
 
 // Output
 // TODO(student): Output values to fragment shader

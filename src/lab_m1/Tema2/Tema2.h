@@ -1,8 +1,11 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 #include "components/simple_scene.h"
+#include "lab_m1/Tema2/obj3D.h"
+#include "lab_m1/Tema2/transf3D.h"
 #include "lab_m1/Tema2/hw_camera.h"
 
 
@@ -35,7 +38,7 @@ namespace m1
         void FrameEnd() override;
 
         void RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 &modelMatrix);
-        void RenderSimpleMesh2(Mesh* mesh, Shader* shader2, const glm::mat4& modelMatrix);
+        void RenderSimpleMeshMini(Mesh* mesh, Shader* shader2, const glm::mat4& modelMatrix);
 
         void OnInputUpdate(float deltaTime, int mods) override;
         void OnKeyPress(int key, int mods) override;
@@ -47,56 +50,43 @@ namespace m1
         void OnWindowResize(int width, int height) override;
 
         void RenderScene(float deltaTimeSeconds);
-
-        void RenderScene2(float deltaTimeSeconds);
-
-        float computeArea(glm::vec3 A, glm::vec3 B, glm::vec3 C);
-        int checkPoint(glm::vec3 A, glm::vec3 B, glm::vec3 C, glm::vec3 P);
-        int checkAll(std::vector<glm::vec3> points, int pointCount, glm::vec3 P);
-        int checkCollision(glm::vec3 A, glm::vec3 B, float aRadius, float bRadius);
-
-        float timeFreeze, initialTime;
-
-        float translateX, translateZ;
-        float angularStepOY;
-
-        glm::vec3 purpleEnemy_position, yellowEnemy_position;
-        float purpleEnemy_translateX, purpleEnemy_translateZ, yellowEnemy_translateX, yellowEnemy_translateZ;
-        float purpleEnemy_angularStepOY, yellowEnemy_angularStepOY;
-
-        glm::vec3 purpleEnemy_forward, yellowEnemy_forward;
-        int purpleEnemy_counter, yellowEnemy_counter;
-        
-        glm::vec3 position;
-        glm::vec3 carPosition;
-        glm::vec3 forward;
-        float cx, cz;
-
-        std::vector<glm::vec3> treeCoordinates;
-        std::vector<std::string> treeNames;
-        std::vector<int> treeRotationAngles;
-
-        std::vector<glm::vec3> directions;
-        float purpleEnemyDistance, yellowEnemyDistance;
-        std::vector<glm::vec3> purpleEnemyPoints;
-        std::vector<glm::vec3> yellowEnemyPoints;
-        std::vector<glm::vec3> purpleEnemyDirections;
-        std::vector<glm::vec3> yellowEnemyDirections;
+        void RenderSceneMini(float deltaTimeSeconds);
 
     protected:
         implement::Camera* camera;
         implement::Camera* miniCamera;
+        glm::vec3 cameraPosition, miniCameraPosition;
+
+        float translateX, translateZ, angularStepOY;
+        glm::vec3 position, forward;
+        float carWidth, carHeight, carLength;
+        float cx, cy, cz;
+        float initialTime, timeFreeze;
+        int tmp;
+
+        float fov, zNear, zFar, left, right, bottom, up;
         glm::mat4 projectionMatrix;
-        bool renderCameraTarget;
-
-        float fov, zNear, zFar;
-        float left, right, bottom, up;
         ViewportArea miniViewportArea;
-        glm::vec3 cameraPosition;
-        glm::vec3 miniCameraPosition;
-        int flag;
 
-        std::vector<glm::vec3> roadPoints;
         int roadPointCount;
+        std::vector<glm::vec3> roadPoints;
+
+        float redDistance, blueDistance;
+        float purpleEnemyDistance, yellowEnemyDistance;
+        float treeRedDistance, treeBlueDistance;
+
+        std::vector<glm::vec3> directions, purpleEnemyPoints, yellowEnemyPoints, treeCoordinates;
+        std::vector<glm::vec3> purpleEnemyDirections, yellowEnemyDirections;
+
+        int purpleEnemy_counter;
+        glm::vec3 purpleEnemy_position, purpleEnemy_forward;
+        float purpleEnemy_translateX, purpleEnemy_translateZ, purpleEnemy_angularStepOY;
+        
+        int yellowEnemy_counter;
+        glm::vec3 yellowEnemy_position, yellowEnemy_forward;
+        float yellowEnemy_translateX, yellowEnemy_translateZ, yellowEnemy_angularStepOY;
+
+
+
     };
-}   // namespace m1
+}
