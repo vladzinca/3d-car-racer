@@ -179,17 +179,17 @@ void Tema2::Init()
     purpleEnemyDirections.push_back(glm::normalize(purpleEnemyPoints[0] - purpleEnemyPoints[tmp]));
     yellowEnemyDirections.push_back(glm::normalize(yellowEnemyPoints[0] - yellowEnemyPoints[tmp]));
 
-    purpleEnemy_counter = 11;
-    purpleEnemy_position = purpleEnemyPoints[10];
-    purpleEnemy_forward = purpleEnemyDirections[10];
+    purpleEnemy_counter = 1;
+    purpleEnemy_position = purpleEnemyPoints[0];
+    purpleEnemy_forward = purpleEnemyDirections[0];
 
     purpleEnemy_translateX = purpleEnemy_position.x - 0.25f;
     purpleEnemy_translateZ = purpleEnemy_position.z - 0.5f;
     purpleEnemy_angularStepOY = (float)(atan2(purpleEnemy_forward.x, purpleEnemy_forward.z) - atan2(0, -1));
 
-    yellowEnemy_counter = 11;
-    yellowEnemy_forward = -yellowEnemyDirections[11];
-    yellowEnemy_position = yellowEnemyPoints[12];
+    yellowEnemy_counter = 1;
+    yellowEnemy_forward = -yellowEnemyDirections[1];
+    yellowEnemy_position = yellowEnemyPoints[2];
 
     yellowEnemy_translateX = yellowEnemy_position.x - 0.25f;
     yellowEnemy_translateZ = yellowEnemy_position.z - 0.5f;
