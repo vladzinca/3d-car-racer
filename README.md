@@ -19,7 +19,7 @@ The code I wrote can be found in `3d-car-racer/src/lab_m1/Tema2/` and is run usi
 
 It basically lets you drive a cyan car using the W, A, S and D keys on a pre-determined racetrack.
 
-However, this is not all.
+However, that's not all.
 
 Alongside you, there are other two other enemy cars that you can compete with, but be careful, as hitting them will ultimately slow you down.
 
