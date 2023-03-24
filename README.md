@@ -19,9 +19,13 @@ The code I wrote can be found in `3d-car-racer/src/lab_m1/Tema2/` and is run usi
 
 It basically lets you drive a cyan car using the W, A, S and D keys on a pre-determined racetrack.
 
+![image](https://user-images.githubusercontent.com/74200913/227506488-46e61cfa-cdda-4c34-b6d2-e9f1b92e844f.png)
+
 However, that's not all.
 
 Alongside you, there are other two other enemy cars that you can compete with, but be careful, as hitting them will ultimately slow you down.
+
+![image](https://user-images.githubusercontent.com/74200913/227506615-83c4b9cd-b14c-4ca5-9f82-a54b5bea064a.png)
 
 Also of note is that the terrain you find yourself in is virtually complex: along the racetrack there are many trees that give the game a uniquely arcade-ish vibe, and we also have a shader inside the game, written in GLSL simulating a spherical surface, so it looks like all the racing is taking place on a globe (something along the lines of being an ant on a ball).
 
